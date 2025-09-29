@@ -1,60 +1,57 @@
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.*;
 
 class Main {
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         Main test = new Main();
 
-        Scanner sc = new Scanner(System.in);
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        int n = Integer.parseInt(st.nextToken());
+        int m = Integer.parseInt(st.nextToken());
 
-        int N = sc.nextInt();
-
-        int[] result = test.solution(N);
-
-        StringBuffer sb = new StringBuffer();
-        for (int value : result) {
-            sb.append(value + " ");
+        List<Integer>[] list = new ArrayList[n];
+        for(int i = 0; i < n; i++) {
+            list[i] = new ArrayList<>();
+            st = new StringTokenizer(br.readLine());
+            int k = Integer.parseInt(st.nextToken());
+            while(k --> 0) {
+                list[i].add(Integer.parseInt(st.nextToken()) -1);
+            }
         }
-        System.out.println(sb.toString().trim());
+        System.out.println(test.solution(list, n, m));
     }
 
-    private int[] solution(int N) {
-        int start = 1;
-        int end = N;
-        int digit = 1;
-
-        int[] cnt = new int[10];
-
-        while (start <= end) {
-            while (start % 10 != 0 && start <= end) {
-                addNumber(start, digit, cnt);
-                start++;
+    private int solution(List<Integer>[] list, int n, int m) {
+        int count = 0;
+        int[] cows = new int[n];
+        int[] houses = new int[m];
+        Arrays.fill(cows, -1);
+        Arrays.fill(houses, -1);
+        for(int i = 0; i < n; i++) {
+            if(dfs(list, i, cows, houses, new boolean[houses.length])) {
+                count++;
             }
-
-            while (end % 10 != 9 && start <= end) {
-                addNumber(end, digit, cnt);
-                end--;
-            }
-
-            if (start > end) break;
-
-            start /= 10;
-            end /= 10;
-
-            for (int i = 0; i < 10; i++) {
-                cnt[i] += (end - start + 1) * digit;
-            }
-
-            digit *= 10;
         }
-        return cnt;
+        return count;
     }
 
-    private void addNumber(int start, int digit, int[] cnt) {
-        while (start > 0) {
-            cnt[start % 10] += digit;
-            start /= 10;
+    private boolean dfs(List<Integer>[] list, int cur, int[] cows, int[] houses, boolean[] checked) {
+        for(int num : list[cur]) {
+            if(checked[num]) continue;
+            checked[num] = true;
+            if(houses[num] == -1 || dfs(list, houses[num], cows, houses, checked)) {
+                cows[cur] = num;
+                houses[num] = cur;
+                return true;
+            }
         }
+        return false;
     }
+
+
 }
 
