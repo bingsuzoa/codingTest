@@ -1,103 +1,66 @@
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Scanner;
+import java.io.InputStreamReader;
+import java.util.*;
 
 class Main {
-    static int[] nums = new int[]{6, 2, 5, 5, 4, 5, 6, 3, 7, 5};
-    static long[][] dp;
-    static long number;
-    static int[] numbers;
-    static int N;
-
+    static int[][] graph;
+    static int r1,c1,r2,c2, max;
+    static int[] dx = {0, -1, 0, 1};
+    static int[] dy = {1, 0, -1, 0};
     public static void main(String[] args) throws IOException {
+        BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        StringTokenizer st = new StringTokenizer(br.readLine());
 
-        Scanner sc = new Scanner(System.in);
+        r1 = Integer.parseInt(st.nextToken());
+        c1 = Integer.parseInt(st.nextToken());
+        r2 = Integer.parseInt(st.nextToken());
+        c2 = Integer.parseInt(st.nextToken());
 
-        String input = sc.next();
-        number = Long.parseLong(input);
-        numbers = Arrays.stream(input.split("")).mapToInt(Integer::parseInt).toArray();
-        dp = putDp();
-        N = input.length();
+        graph = new int[r2 - r1 + 1][c2 - c1 + 1];
 
-        /// 일의 자리
-        long result = (long)Math.pow(10, N);
-        int prefix = nums[numbers[N -1]];
-        for(int d = 0; d < 10; d++) {
-            if(prefix == nums[d] && numbers[N -1] < d) {
-                result = Math.min(result, d - numbers[N-1]);
+        int x = 0;
+        int y = 0;
+        int num = 1;
+        int cnt = 0;
+        int dnum = 1;
+        int dir = 0;
+
+        max = 0;
+        while(!isFinish()) {
+            if(x - r1 >= 0 && y - c1 >= 0 && x - r1 < graph.length && y -c1 < graph[0].length) {
+                graph[x- r1][y - c1] = num;
+                max = Math.max(max, num);
             }
-            else if(prefix == nums[d] && numbers[N-1] >= d) {
-                result = Math.min(result, (long)Math.pow(10, N) - numbers[N-1] + d);
-            }
-        }
-        /// 십의 자리부터
-        int count = nums[numbers[N-1]];
-        for(int len = 2; len <= N; len ++) {
-            long digit = number % (long)Math.pow(10, len);
-            count += nums[numbers[N-len]];
+            num++;
+            cnt++;
+            x = x + dx[dir];
+            y = y + dy[dir];
 
-            for(int num = 0; num < 10; num++) {
-                if(count - nums[num] >= 0) {
-                    long pows = num * (long)Math.pow(10, len-1);
-                    long target = dp[len-1][count - nums[num]];
-                    if(target != Long.MAX_VALUE && digit != (pows + target)) {
-                        long value = pows + target - digit;
-                        if(value <= 0) {
-                            value += (long)Math.pow(10, N);
-                        }
-                        result = Math.min(result, value);
-                    }
-                }
+            if(cnt == dnum) {
+                if(dir == 1 || dir == 3) dnum++;
+                dir++;
+                dir %= 4;
+                cnt = 0;
             }
         }
-        System.out.println(result);
+
+        print();
     }
 
-    private static long[][] putDp() {
-        long[][] dp = new long[15 + 1][15 * 7 + 1];
+    private static boolean isFinish() {
+        return graph[0][0] != 0 && graph[0][c2-c1] != 0 && graph[r2-r1][0] != 0 && graph[r2-r1][c2-c1] != 0;
+    }
 
-        for(int i = 0; i < dp.length; i++) {
-            Arrays.fill(dp[i], Long.MAX_VALUE);
-        }
+    private static void print() {
+        int len = String.valueOf(max).length();
 
-        for(int d = 0; d <= 9; d++) {
-            dp[1][nums[d]] = Math.min(dp[1][nums[d]], d);
-        }
-
-        for(int len = 2; len < dp.length; len++) {
-            for(int sum = 0; sum < dp[len].length; sum++) {
-                for(int d = 0; d <= 9; d++) {
-                    if(sum - nums[d] < 0 || dp[len -1][sum - nums[d]] == Long.MAX_VALUE) continue;
-                    long newNum = (long)(d * Math.pow(10, len -1)) + dp[len-1][sum-nums[d]];
-                    dp[len][sum] = Math.min(dp[len][sum], newNum);
-                }
+        for(int i = 0; i < graph.length; i++) {
+            for(int j = 0; j < graph[i].length; j++) {
+                System.out.printf("%" + len + "d", graph[i][j]);
+                System.out.print(" ");
             }
+            System.out.println();
         }
-        return dp;
     }
-
-    private static long getNumber(int len) {
-        int startIdx = numbers.length - len;
-
-        int digit = len;
-        long number = 0;
-        for(int i = startIdx; i < numbers.length; i++) {
-            number += numbers[i] * (long)Math.pow(10, digit-1);
-            digit--;
-        }
-        return number;
-    }
-
-    private static int getSum(int len) {
-        int sum = 0;
-        int startIdx = numbers.length - len;
-
-        for(int i = startIdx; i < numbers.length; i++) {
-            sum += nums[numbers[i]];
-        }
-        return sum;
-    }
-
-
 }
-
