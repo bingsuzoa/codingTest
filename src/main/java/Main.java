@@ -4,63 +4,62 @@ import java.io.InputStreamReader;
 import java.util.*;
 
 class Main {
-    static int[][] graph;
-    static int r1,c1,r2,c2, max;
-    static int[] dx = {0, -1, 0, 1};
-    static int[] dy = {1, 0, -1, 0};
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
+        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+        int N = Integer.parseInt(st.nextToken());
+        long K = Long.parseLong(st.nextToken()) + 1;
 
-        r1 = Integer.parseInt(st.nextToken());
-        c1 = Integer.parseInt(st.nextToken());
-        r2 = Integer.parseInt(st.nextToken());
-        c2 = Integer.parseInt(st.nextToken());
+        long[][] dp = new long[51][51];
 
-        graph = new int[r2 - r1 + 1][c2 - c1 + 1];
-
-        int x = 0;
-        int y = 0;
-        int num = 1;
-        int cnt = 0;
-        int dnum = 1;
-        int dir = 0;
-
-        max = 0;
-        while(!isFinish()) {
-            if(x - r1 >= 0 && y - c1 >= 0 && x - r1 < graph.length && y -c1 < graph[0].length) {
-                graph[x- r1][y - c1] = num;
-                max = Math.max(max, num);
+        dp[0][0] = 1;
+        for(int len = 1; len <= 50; len++) {
+            for(int bal = 0; bal <= 50; bal++) {
+                if(bal + 1 <=50) dp[len][bal] += dp[len-1][bal+1];
+                if(bal -1 >= 0) dp[len][bal] += dp[len-1][bal-1];
             }
-            num++;
-            cnt++;
-            x = x + dx[dir];
-            y = y + dy[dir];
+        }
+        long total = (long)Math.pow(2, N);
+        long valid = dp[N][0];
+        if(K > total - valid) {
+            System.out.println(-1);
+            return;
+        }
 
-            if(cnt == dnum) {
-                if(dir == 1 || dir == 3) dnum++;
-                dir++;
-                dir %= 4;
-                cnt = 0;
+        char[] result = new char[N];
+        int bal = 0;
+        for(int pos = 0; pos < result.length; pos++) {
+            if(bal < 0) {
+                long cur = (long)Math.pow(2, N-pos-1);
+                if(cur < K) {
+                    result[pos] = ')';
+                    K -= cur;
+                } else {
+                    result[pos] = '(';
+                }
+
+            } else {
+                long cur = (long)Math.pow(2, N-pos-1) - dp[N-pos-1][bal + 1];
+                if(cur < K) {
+                    result[pos] = ')';
+                    bal--;
+                    K -= cur;
+                } else {
+                    result[pos] = '(';
+                    bal++;
+                }
             }
         }
 
-        print();
-    }
-
-    private static boolean isFinish() {
-        return graph[0][0] != 0 && graph[0][c2-c1] != 0 && graph[r2-r1][0] != 0 && graph[r2-r1][c2-c1] != 0;
-    }
-
-    private static void print() {
-        int len = String.valueOf(max).length();
-
-        for(int i = 0; i < graph.length; i++) {
-            for(int j = 0; j < graph[i].length; j++) {
-                System.out.printf("%" + len + "d", graph[i][j]);
-                System.out.print(" ");
-            }
-            System.out.println();
+        StringBuffer sb = new StringBuffer();
+        for(char c : result) {
+            sb.append(c);
         }
+        System.out.println(sb);
+
+
     }
+
+
+
 }
