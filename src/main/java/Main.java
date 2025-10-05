@@ -1,65 +1,91 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.StringTokenizer;
 
 class Main {
+    static int N, M;
+    static int[][] graph;
+    static long answer;
+
     public static void main(String[] args) throws IOException {
+        answer = -1L;
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-        int N = Integer.parseInt(st.nextToken());
-        long K = Long.parseLong(st.nextToken()) + 1;
 
-        long[][] dp = new long[51][51];
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
 
-        dp[0][0] = 1;
-        for(int len = 1; len <= 50; len++) {
-            for(int bal = 0; bal <= 50; bal++) {
-                if(bal + 1 <=50) dp[len][bal] += dp[len-1][bal+1];
-                if(bal -1 >= 0) dp[len][bal] += dp[len-1][bal-1];
+        graph = new int[N][M];
+
+        for(int i = 0; i < graph.length; i++) {
+            String input = br.readLine();
+            for(int j = 0; j < graph[i].length; j++) {
+                graph[i][j] = input.charAt(j) - '0';
             }
         }
-        long total = (long)Math.pow(2, N);
-        long valid = dp[N][0];
-        if(K > total - valid) {
-            System.out.println(-1);
+
+        for(int idst = -N; idst < N; idst++) {
+            for(int jdst = -M; jdst < M; jdst++) {
+                for(int i = 0; i < graph.length; i++) {
+                    for(int j = 0; j < graph[i].length; j++) {
+                        bfs(idst, jdst, i, j);
+                    }
+                }
+            }
+        }
+        System.out.println(answer);
+    }
+    private static void bfs(int idst, int jdst, int x, int y) {
+        if(idst == 0 && jdst == 0) {
+            StringBuffer sb = new StringBuffer();
+            sb.append(graph[x][y]);
+            updateAnswer(sb.toString());
             return;
         }
-
-        char[] result = new char[N];
-        int bal = 0;
-        for(int pos = 0; pos < result.length; pos++) {
-            if(bal < 0) {
-                long cur = (long)Math.pow(2, N-pos-1);
-                if(cur < K) {
-                    result[pos] = ')';
-                    K -= cur;
-                } else {
-                    result[pos] = '(';
+        if(idst != 0 && jdst == 0) {
+            StringBuffer sb = new StringBuffer();
+            for(int i = x; i < graph.length; i+= idst) {
+                if(i < 0) {
+                    updateAnswer(sb.toString());
+                    return;
                 }
-
-            } else {
-                long cur = (long)Math.pow(2, N-pos-1) - dp[N-pos-1][bal + 1];
-                if(cur < K) {
-                    result[pos] = ')';
-                    bal--;
-                    K -= cur;
-                } else {
-                    result[pos] = '(';
-                    bal++;
-                }
+                sb.append(graph[i][y]);
+                updateAnswer(sb.toString());
             }
+            return;
         }
-
+        if(idst == 0 && jdst != 0) {
+            StringBuffer sb = new StringBuffer();
+            for(int j = y; j < graph[0].length; j+=jdst) {
+                if(j < 0) {
+                    updateAnswer(sb.toString());
+                    return;
+                }
+                sb.append(graph[x][j]);
+                updateAnswer(sb.toString());
+            }
+            return;
+        }
         StringBuffer sb = new StringBuffer();
-        for(char c : result) {
-            sb.append(c);
+        while(x >= 0 && y >= 0 && x < graph.length && y < graph[0].length) {
+            sb.append(graph[x][y]);
+            updateAnswer(sb.toString());
+            x += idst;
+            y += jdst;
         }
-        System.out.println(sb);
-
-
     }
 
 
-
+    private static void updateAnswer(String s) {
+        s.replace(" ", "");
+        if(s.equals("")) {
+            return;
+        }
+        long num = Long.parseLong(s);
+        long compare = (long)Math.sqrt(num);
+        if(compare * compare == num) {
+            answer = Math.max(answer, num);
+        }
+    }
 }
