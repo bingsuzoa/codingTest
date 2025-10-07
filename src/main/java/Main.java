@@ -1,46 +1,52 @@
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.Arrays;
-import java.util.PriorityQueue;
 import java.util.StringTokenizer;
 
-class Main { ;
+class Main {
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         int N = Integer.parseInt(br.readLine());
+        long[] array = new long[N];
 
-        int[] A = new int[N];
-        int[] B = new int[N];
-
-        StringTokenizer Ainput = new StringTokenizer(br.readLine());
-        for(int i =0; i < A.length; i++) {
-            A[i] = Integer.parseInt(Ainput.nextToken());
-        }
-        Arrays.sort(A);
-
-        StringTokenizer Binput = new StringTokenizer(br.readLine());
-        for(int i = 0; i < B.length; i++) {
-            B[i] = Integer.parseInt(Binput.nextToken());
-        }
-        Arrays.sort(B);
-
-        int[] temp = new int[N];
-        for(int i =0 ; i< temp.length; i++) {
-            temp[i] = B[N-1-i];
+        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+        for (int i = 0; i < N; i++) {
+            array[i] = Long.parseLong(st.nextToken());
         }
 
-
-        int sum = 0;
-        for(int i = 0; i < N; i++) {
-            sum += (A[i] * temp[i]);
+        int answer = 0;
+        for (int i = 0; i < array.length; i++) {
+            int result = 0;
+            for (int j = i - 1; j >= 0; j--) {
+                if (check(j, i, array)) {
+                    result++;
+                }
+            }
+            for (int j = i + 1; j < array.length; j++) {
+                if (check(i, j, array)) {
+                    result++;
+                }
+            }
+            answer = Math.max(answer, result);
         }
-        System.out.println(sum);
+        System.out.println(answer);
+    }
 
+    private static boolean check(int left, int right, long[] array) {
+        boolean isResult = true;
+        double incline = (double)(array[right] - array[left]) / (right - left);
 
+        for (int i = left + 1; i < right; i++) {
+            double y = (incline * (i - left)) + array[left];
 
+            if (array[i] >= y) {
+                isResult = false;
+                break;
+            }
+        }
+        return isResult;
     }
 
 
