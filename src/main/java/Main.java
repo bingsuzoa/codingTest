@@ -2,66 +2,86 @@ import java.util.*;
 import java.io.*;
 
 class Main {
-    static int N,M;
-    static int[][] graph;
+    static List<Integer>[] list;
+    static int[] graph;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        N = Integer.parseInt(st.nextToken());
-        M = Integer.parseInt(st.nextToken());
 
-        graph = new int[N][M];
+        int N = Integer.parseInt(br.readLine());
+        graph = new int[N];
 
-        for(int i = 0; i < N; i++) {
-            String input = br.readLine();
-            int idx = 0;
-            for(char c : input.toCharArray()) {
-                graph[i][idx++] = c -'0';
-            }
+        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+        for(int i = 0; i < graph.length; i++) {
+            graph[i] = Integer.parseInt(st.nextToken());
         }
 
-        int[][] leftDown = new int[N][M];
-        int[][] rightDown = new int[N][M];
-        int[][] leftUp = new int[N][M];
-        int[][] rightUp = new int[N][M];
+        boolean[] primes = new boolean[2001];
+        Arrays.fill(primes, true);
+        primes[0] = false;
+        primes[1] = false;
 
-        for(int i = 0; i < N; i++) {
-            for(int j = 0; j < M; j++) {
-                if(graph[i][j] == 1) {
-                    leftDown[i][j] = 1;
-                    rightDown[i][j] = 1;
-                    if(i - 1 >= 0 && j - 1 >= 0) leftDown[i][j] += leftDown[i-1][j-1];
-                    if(i -1 >= 0 && j + 1 < M) rightDown[i][j] += rightDown[i-1][j+1];
+        for(int i = 2; i <= (int)Math.sqrt(2000); i++) {
+            if(primes[i]) {
+                for(int j = i + i; j < primes.length; j += i) {
+                    primes[j] = false;
                 }
             }
         }
 
-        for(int i = N-1; i >= 0; i--) {
-            for(int j = 0; j < M; j++) {
-                if(graph[i][j] == 1) {
-                    leftUp[i][j] = 1;
-                    rightUp[i][j] = 1;
-                    if(i + 1 < N && j - 1 >= 0) leftUp[i][j] += leftUp[i+1][j-1];
-                    if(i +1 < N && j + 1 < M) rightUp[i][j] += rightUp[i+1][j+1];
+        list = new ArrayList[N];
+        for(int i = 0; i < graph.length; i++) {
+            list[i] = new ArrayList<>();
+            for(int j = 0; j < graph.length; j++) {
+                if(i == j) continue;
+                if(primes[graph[i] + graph[j]]) {
+                    list[i].add(j);
                 }
             }
         }
 
-        int answer = 0;
-        for(int i = 0; i < N; i++) {
-            for(int j = 0; j < M; j++) {
-                int maxSize = Math.min(leftDown[i][j], rightDown[i][j]);
-                for(int size = maxSize; size > answer; size--) {
-                    int top = i - 2 * (size - 1);
-                    if(top < 0) continue;
-                    if(leftUp[top][j] >= size && rightUp[top][j] >= size) {
-                        answer = Math.max(answer, size);
-                        break;
-                    }
+        List<Integer> answer = new ArrayList<>();
+        for(int first : list[0]) {
+            int[] left = new int[N];
+            int[] right = new int[N];
+            Arrays.fill(left, -1);
+            Arrays.fill(right, -1);
+            left[0] = first;
+            right[first] = 0;
+            int result = 1;
+            for(int idx = 1; idx < graph.length; idx++) {
+                if(dfs(idx, new boolean[N], left, right)) {
+                    result++;
                 }
             }
+            if(result == list.length) {
+                answer.add(graph[first]);
+            }
         }
-        System.out.println(answer);
+        if(answer.isEmpty()) {
+            System.out.println(-1);
+        } else {
+            Collections.sort(answer);
+            StringBuffer sb = new StringBuffer();
+            for(int value : answer) {
+                sb.append(value + " ");
+            }
+            System.out.println(sb.toString().trim());
+        }
+    }
+
+    private static boolean dfs(int cnt, boolean[] checked, int[] left, int[] right) {
+        if(cnt == 0 || checked[cnt]) {
+            return false;
+        }
+        for(int next : list[cnt]) {
+            checked[cnt] = true;
+            if(right[next] == -1 || dfs(right[next], checked, left, right)) {
+                left[cnt] = next;
+                right[next] = cnt;
+                return true;
+            }
+        }
+        return false;
     }
 }
