@@ -1,63 +1,47 @@
-import java.util.*;
 import java.io.*;
+import java.util.*;
 
 class Main {
-    static long[] graph;
-    public static void main(String[] args) throws IOException {
+    static int N;
+    static int[][] graph;
+    static int[][][] dp;
 
+    public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        long N = Long.parseLong(br.readLine());
+        N = Integer.parseInt(br.readLine());
 
-        graph = new long[10];
+        graph = new int[N][N];
 
-        long start = 1;
-        long end = N;
-        int pos = 1;
-
-        while(true) {
-            while(true) {
-                if(start % 10 != 0 && start <= end) {
-                    addNumber(start, pos);
-                    start++;
-                } else {
-                    break;
-                }
+        for(int i = 0; i < N; i++) {
+            String input = br.readLine();
+            for(int j = 0;j < input.length(); j++) {
+                graph[i][j] = input.charAt(j) - '0';
             }
-
-            while(true) {
-                if(end % 10 != 9 && start <= end) {
-                    addNumber(end, pos);
-                    end--;
-                } else {
-                    break;
-                }
-            }
-
-            if(start > end) {
-                break;
-            }
-
-            start /= 10;
-            end /= 10;
-
-            for(int i = 0; i < graph.length; i++) {
-                graph[i] += (end - start + 1) * pos;
-            }
-            pos *= 10;
         }
 
-        StringBuffer sb = new StringBuffer();
-        for(long value : graph) {
-            sb.append(value + " ");
+        dp = new int[1<<N][N][10];
+        for(int i =0 ; i < dp.length; i++) {
+            for(int j= 0; j < dp[i].length; j++) {
+                Arrays.fill(dp[i][j], -1);
+            }
         }
-        System.out.println(sb.toString().trim());
+        dfs(1, 0, 0);
+        System.out.println(dp[1][0][0]);
     }
-
-    private static void addNumber(long num, int pos) {
-        while(num > 0) {
-            graph[(int)num % 10] += pos;
-            num /= 10;
+    private static int dfs(int visited, int artist, int price) {
+        int count = dp[visited][artist][price];
+        if(count != -1) {
+            return count;
         }
+
+        count = 0;
+        for(int next = 1; next < N; next++) {
+            if((visited & (1<<next)) == 0 && graph[artist][next] >= price) {
+                int nextVisited = visited | (1<<next);
+                count = Math.max(count, dfs(nextVisited, next, graph[artist][next]) + 1);
+            }
+        }
+        return dp[visited][artist][price] = count;
     }
 }
