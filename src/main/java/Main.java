@@ -2,46 +2,49 @@ import java.io.*;
 import java.util.*;
 
 class Main {
-    static int N;
-    static int[][] graph;
-    static int[][][] dp;
+    static int s, N, K, R1, R2, C1, C2;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        N = Integer.parseInt(br.readLine());
+        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
 
-        graph = new int[N][N];
+        s = Integer.parseInt(st.nextToken());
+        N = Integer.parseInt(st.nextToken());
+        K = Integer.parseInt(st.nextToken());
+        R1 = Integer.parseInt(st.nextToken());
+        R2 = Integer.parseInt(st.nextToken());
+        C1 = Integer.parseInt(st.nextToken());
+        C2 = Integer.parseInt(st.nextToken());
 
-        for(int i = 0; i < N; i++) {
-            String input = br.readLine();
-            for(int j = 0;j < input.length(); j++) {
-                graph[i][j] = input.charAt(j) - '0';
+        long size = (long)Math.pow(N, s);
+        StringBuffer sb = new StringBuffer();
+        for(int i = R1; i <= R2; i++) {
+            for(int j = C1; j <= C2; j++) {
+                if(isBlack(i, j, size)) {
+                    sb.append('1');
+                } else {
+                    sb.append('0');
+                }
             }
+            sb.append('\n');
         }
-
-        dp = new int[1<<N][N][10];
-        for(int i =0 ; i < dp.length; i++) {
-            for(int j= 0; j < dp[i].length; j++) {
-                Arrays.fill(dp[i][j], -1);
-            }
-        }
-        dfs(1, 0, 0);
-        System.out.println(dp[1][0][0]);
+        System.out.print(sb);
     }
-    private static int dfs(int visited, int artist, int price) {
-        int count = dp[visited][artist][price];
-        if(count != -1) {
-            return count;
+
+    private static boolean isBlack(int gx, int gy, long line) {
+        long n = line / N;
+        if(n < 1) {
+            return false;
         }
 
-        count = 0;
-        for(int next = 1; next < N; next++) {
-            if((visited & (1<<next)) == 0 && graph[artist][next] >= price) {
-                int nextVisited = visited | (1<<next);
-                count = Math.max(count, dfs(nextVisited, next, graph[artist][next]) + 1);
-            }
+        long start = ((N - K) / 2) * n;
+        long end = start + (n * K);
+        if(gx >= (int)start && gx < (int) end && gy >= (int) start && gy < (int) end) {
+            return true;
         }
-        return dp[visited][artist][price] = count;
+
+        return isBlack(gx %(int) n, gy % (int)n, n);
+
     }
 }
