@@ -29,21 +29,9 @@ class Main {
 
         long[] ratio = new long[N];
         ratio[0] = lcm;
-
-        Queue<Integer> queue = new LinkedList<>();
-        queue.add(0);
-
-        while(!queue.isEmpty()) {
-            int cur = queue.poll();
-            for(int[] to : list[cur]) {
-                int next = to[0];
-                int p = to[1];
-                int q = to[2];
-                if(ratio[next] != 0) continue;
-                ratio[next] = ratio[cur] * q / p;
-                queue.add(next);
-            }
-        }
+        boolean[] visited = new boolean[N];
+        visited[0] = true;
+        dfs(0, ratio, visited);
 
         long mgcd = ratio[0];
         for(int i = 1; i < ratio.length; i++) {
@@ -55,6 +43,19 @@ class Main {
             sb.append((r / mgcd) + " ");
         }
         System.out.println(sb.toString().trim());
+    }
+
+    private static void dfs(int node, long[] ratio, boolean[] visited) {
+        for(int[] to : list[node]) {
+            int next = to[0];
+            int p = to[1];
+            int q = to[2];
+            if(!visited[next]) {
+                ratio[next] = ratio[node] * q / p;
+                visited[next] = true;
+                dfs(next, ratio, visited);
+            }
+        }
     }
 
     private static long lcm(long a, long b) {
