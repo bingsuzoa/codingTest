@@ -1,96 +1,68 @@
-import java.util.*;
 import java.io.*;
+import java.util.*;
 
 class Main {
-    static int[] nums = new int[]{6,2,5,5,4,5,6,3,7,5};
-    static long[][] dp;
-    static String input;
+    static List<int[]>[] list;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        input = br.readLine();
+        int N = Integer.parseInt(br.readLine());
 
-        dp = new long[15+1][15*7+1];
-        for(int i = 0; i < dp.length; i++) {
-            Arrays.fill(dp[i], Long.MAX_VALUE);
+        String[] inputs = new String[N-1];
+        long lcm = 1;
+        list = new ArrayList[N];
+        for(int i = 0; i < list.length; i++) {
+            list[i] = new ArrayList<>();
         }
-        dp[0][0] = 0;
 
-        for(int pos = 1; pos < dp.length; pos++) {
-            for(int sum = 1; sum < dp[pos].length; sum++) {
-                for(int j = 0; j < 10; j++) {
-                    if(sum - nums[j] < 0 || dp[pos-1][sum - nums[j]] == Long.MAX_VALUE) continue;
-                    long now = ((long)Math.pow(10, pos-1) * j) + dp[pos-1][sum - nums[j]];
-                    dp[pos][sum] = Math.min(dp[pos][sum], now);
-                }
+        for(int i = 0; i < inputs.length; i++) {
+            StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+            int a = Integer.parseInt(st.nextToken());
+            int b = Integer.parseInt(st.nextToken());
+            int p = Integer.parseInt(st.nextToken());
+            int q = Integer.parseInt(st.nextToken());
+            list[a].add(new int[]{b, p, q});
+            list[b].add(new int[]{a, q, p});
+            lcm *= lcm(p, q);
+        }
+
+        long[] ratio = new long[N];
+        ratio[0] = lcm;
+
+        Queue<Integer> queue = new LinkedList<>();
+        queue.add(0);
+
+        while(!queue.isEmpty()) {
+            int cur = queue.poll();
+            for(int[] to : list[cur]) {
+                int next = to[0];
+                int p = to[1];
+                int q = to[2];
+                if(ratio[next] != 0) continue;
+                ratio[next] = ratio[cur] * q / p;
+                queue.add(next);
             }
         }
 
-        ///정답
-        long answer = Long.MAX_VALUE;
-
-        ///일의 자리
-        int oneNum = input.charAt(input.length() - 1) - '0';
-        int oneGoal = getSum(1);
-        for(int i = 0; i < 10; i++) {
-            if(oneGoal == nums[i]) {
-                if(oneNum < i) {
-                    answer = Math.min(answer, i - oneNum);
-                } else {
-                    answer = Math.min(answer, (long)Math.pow(10, input.length()) - oneNum + i);
-                }
-            }
+        long mgcd = ratio[0];
+        for(int i = 1; i < ratio.length; i++) {
+            mgcd = gcd(mgcd, ratio[i]);
         }
 
-        ///십의 자리 부터
-        if(input.length() -2 < 0) {
-            System.out.println(answer);
-            return;
+        StringBuffer sb = new StringBuffer();
+        for(long r : ratio) {
+            sb.append((r / mgcd) + " ");
         }
-
-        for(int i = input.length() - 2; i >= 0; i--) {
-            int pos = input.length() - i;
-
-            int goal = getSum(pos);
-            long num = getNum(pos);
-
-            for(int n = 0; n < 10; n++) {
-                int needSum = goal - nums[n];
-                if(needSum < 0 || dp[pos -1][needSum] == Long.MAX_VALUE) continue;
-
-                long now = n * (long) Math.pow(10, pos - 1) + dp[pos - 1][needSum];
-                if(num < now) {
-                    answer = Math.min(answer, now - num);
-                } else {
-                    answer = Math.min(answer, (long) Math.pow(10, input.length()) - num + now);
-                }
-            }
-        }
-
-        System.out.println(answer);
+        System.out.println(sb.toString().trim());
     }
 
-    private static int getSum(int pos) {
-        int sum = 0;
-        int N = input.length();
-        for(int i = N - pos; i < input.length(); i++) {
-            sum += nums[input.charAt(i) - '0'];
-        }
-        return sum;
+    private static long lcm(long a, long b) {
+        return a * b / gcd(a, b);
     }
 
-    private static long getNum(int pos) {
-        int N = input.length();
-
-        long result = 0;
-        long rec = pos - 1;
-        for(int i = N - pos; i < input.length(); i++) {
-            int c = input.charAt(i) - '0';
-            result += (long)Math.pow(10, rec) * c;
-            rec--;
-        }
-        return result;
+    private static long gcd(long a, long b) {
+        if(b == 0) return a;
+        return gcd(b, a % b);
     }
-
 }
