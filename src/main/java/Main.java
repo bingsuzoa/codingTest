@@ -1,69 +1,49 @@
 import java.io.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 class Main {
-    static List<int[]>[] list;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
+        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
         int N = Integer.parseInt(br.readLine());
+        List<Integer> list = new ArrayList<>();
 
-        String[] inputs = new String[N-1];
-        long lcm = 1;
-        list = new ArrayList[N];
-        for(int i = 0; i < list.length; i++) {
-            list[i] = new ArrayList<>();
+        int size = 0;
+        while(N --> 0) {
+            int n = Integer.parseInt(br.readLine());
+            int idx = check(list, n);
+            list.add(idx, n);
+
+            size++;
+            bw.write(list.get((size - 1)/2) + "\n");
         }
 
-        for(int i = 0; i < inputs.length; i++) {
-            StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-            int a = Integer.parseInt(st.nextToken());
-            int b = Integer.parseInt(st.nextToken());
-            int p = Integer.parseInt(st.nextToken());
-            int q = Integer.parseInt(st.nextToken());
-            list[a].add(new int[]{b, p, q});
-            list[b].add(new int[]{a, q, p});
-            lcm *= lcm(p, q);
-        }
-
-        long[] ratio = new long[N];
-        ratio[0] = lcm;
-        boolean[] visited = new boolean[N];
-        visited[0] = true;
-        dfs(0, ratio, visited);
-
-        long mgcd = ratio[0];
-        for(int i = 1; i < ratio.length; i++) {
-            mgcd = gcd(mgcd, ratio[i]);
-        }
-
-        StringBuffer sb = new StringBuffer();
-        for(long r : ratio) {
-            sb.append((r / mgcd) + " ");
-        }
-        System.out.println(sb.toString().trim());
+        bw.flush();
+        bw.close();
     }
 
-    private static void dfs(int node, long[] ratio, boolean[] visited) {
-        for(int[] to : list[node]) {
-            int next = to[0];
-            int p = to[1];
-            int q = to[2];
-            if(!visited[next]) {
-                ratio[next] = ratio[node] * q / p;
-                visited[next] = true;
-                dfs(next, ratio, visited);
+    private static int check(List<Integer> list, int n) {
+        int start = 0;
+        int end = list.size();
+
+        if(list.size() == 0) {
+            return 0;
+        }
+
+        while(start <= end) {
+            int mid = (start + end) / 2;
+            if(mid == list.size()) {
+                return mid;
+            }
+            if(list.get(mid) <= n) {
+                start = mid + 1;
+            } else {
+                end = mid - 1;
             }
         }
-    }
-
-    private static long lcm(long a, long b) {
-        return a * b / gcd(a, b);
-    }
-
-    private static long gcd(long a, long b) {
-        if(b == 0) return a;
-        return gcd(b, a % b);
+        return start;
     }
 }
