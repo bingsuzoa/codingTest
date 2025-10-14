@@ -1,38 +1,40 @@
 import java.io.*;
-import java.util.*;
+import java.util.StringTokenizer;
+
 
 class Main {
+    static long MOD = 1000000007;
+    static long[] dp;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        BufferedWriter bw = new BufferedWriter(new OutputStreamWriter(System.out));
 
-        int N = Integer.parseInt(br.readLine());
+        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+        int N = Integer.parseInt(st.nextToken());
+        int K = Integer.parseInt(st.nextToken());
 
-        PriorityQueue<Integer> left = new PriorityQueue<>(Collections.reverseOrder());
-        PriorityQueue<Integer> right = new PriorityQueue<>();
+        dp = new long[N+1];
+        dp[0] = 1;
 
-        while(N --> 0) {
-            int n = Integer.parseInt(br.readLine());
-
-            if(left.isEmpty() || n <= left.peek()) {
-                left.add(n);
-            } else {
-                right.add(n);
-            }
-
-            if(right.size() - left.size() == 1) {
-                left.offer(right.poll());
-            }
-            else if(left.size() - right.size() >= 2) {
-                right.offer(left.poll());
-            }
-
-            bw.write(left.peek() + "\n");
+        for(int i = 1; i <= N; i++) {
+            dp[i] = (dp[i-1] * i) % MOD;
         }
 
-        bw.flush();
-        bw.close();
+        long upper = dp[N];
+        long bottom = (dp[K] * dp[N-K]) % MOD;
 
+        System.out.println((upper * modPow(bottom, MOD - 2)) % MOD);
+    }
+
+    private static long modPow(long base, long exp) {
+        long result = 1;
+        while(exp > 0) {
+            if((exp & 1) == 1) {
+                result = (base * result) % MOD;
+            }
+            base = (base * base) % MOD;
+            exp >>= 1;
+        }
+        return result;
     }
 }
