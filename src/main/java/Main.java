@@ -1,39 +1,69 @@
+import java.util.*;
 import java.io.*;
-import java.util.StringTokenizer;
-
 
 class Main {
-    static long MOD = 1000000007;
-    static long[] dp;
-
+    static int N;
+    static int[][] original;
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-        int N = Integer.parseInt(st.nextToken());
-        int K = Integer.parseInt(st.nextToken());
+        N = Integer.parseInt(st.nextToken());
+        long B = Long.parseLong(st.nextToken());
 
-        dp = new long[N+1];
-        dp[0] = 1;
+        original = new int[N][N];
 
-        for(int i = 1; i <= N; i++) {
-            dp[i] = (dp[i-1] * i) % MOD;
+        for(int i = 0; i < original.length; i++) {
+            StringTokenizer input = new StringTokenizer(br.readLine(), " ");
+            for(int j = 0; j < original[i].length; j++) {
+                original[i][j] = Integer.parseInt(input.nextToken());
+            }
         }
 
-        long upper = dp[N];
-        long bottom = (dp[K] * dp[N-K]) % MOD;
+        int[][] result = pow(original, B);
 
-        System.out.println((upper * modPow(bottom, MOD - 2)) % MOD);
+        StringBuffer sb = new StringBuffer();
+        for(int i = 0; i < result.length; i++) {
+            for(int j = 0; j < result[i].length; j++) {
+                sb.append(result[i][j] % 1000).append(" ");
+            }
+            sb.append("\n");
+        }
+        System.out.println(sb);
     }
 
-    private static long modPow(long base, long exp) {
-        long result = 1;
-        while(exp > 0) {
-            if((exp & 1) == 1) {
-                result = (base * result) % MOD;
+    private static int[][] pow(int[][] graph, long B) {
+        if(B == 1L) {
+            int[][] base = new int[N][N];
+            for(int i =0 ; i < graph.length; i++) {
+                for(int j = 0; j < graph[i].length; j++) {
+                    base[i][j] = graph[i][j];
+                }
             }
-            base = (base * base) % MOD;
-            exp >>= 1;
+            return base;
+        }
+
+        int[][] ret = pow(graph, B/2);
+        int[][] multi = multiply(ret, ret);
+
+        if(B % 2 != 0) {
+            return multiply(multi, original);
+        }
+
+        return multi;
+    }
+
+    private static int[][] multiply(int[][] o1, int[][] o2) {
+        int[][] result = new int[N][N];
+
+        for(int i = 0; i < result.length; i++) {
+            for(int j = 0; j < result[i].length; j++) {
+                int sum = 0;
+                for(int k = 0; k < N; k++) {
+                    sum += (o1[i][k] * o2[k][j]) % 1000;
+                }
+                result[i][j] = sum % 1000;
+            }
         }
         return result;
     }
