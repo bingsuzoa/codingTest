@@ -2,47 +2,40 @@ import java.util.*;
 import java.io.*;
 
 class Main {
+    static int answer = 0;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         StringTokenizer st = new StringTokenizer(br.readLine(), " ");
 
         int N = Integer.parseInt(st.nextToken());
-        int K = Integer.parseInt(st.nextToken());
+        int r = Integer.parseInt(st.nextToken());
+        int c = Integer.parseInt(st.nextToken());
 
-        String bit = Integer.toBinaryString(N);
+        calculate(N, r, c);
+        System.out.println(answer - 1);
+    }
 
-        int count = Integer.bitCount(N);
-
-        if(count <= K) {
-            System.out.println(0);
+    private static void calculate(int N, int r, int c) {
+        if(N == 1) {
+            if(r == 0 && c == 0) answer += 1;
+            else if(r == 0 && c == 1) answer += 2;
+            else if(r == 1 && c == 0) answer += 3;
+            else answer += 4;
             return;
         }
 
-        int index = 0;
-        for(int i = 0; i < bit.length(); i++) {
-            if(K == 1) {
-                index = i;
-                break;
-            }
-            if(bit.charAt(i) == '1') {
-                K--;
-            }
+        int n = (int)Math.pow(2, N-1);
+
+        if(r/n == 1 && c/n == 1) {
+            answer += (n * n) * 3;
         }
-
-        String split = bit.substring(index);
-        int start = Integer.parseInt(split, 2);
-
-
-        int cur = start;
-        while(true) {
-            cur++;
-            int c = Integer.bitCount(cur);
-            if(c == 1) {
-                System.out.println(cur - start);
-                break;
-            }
+        else if(r/n == 1 && c/n == 0) {
+            answer += (n * n) * 2;
         }
+        else if(r/n == 0 && c/n == 1) {
+            answer += (n * n) * 1;
+        }
+        calculate(N-1, r%n, c%n);
     }
-
 }
