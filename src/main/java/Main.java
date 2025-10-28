@@ -2,97 +2,52 @@ import java.util.*;
 import java.io.*;
 
 class Main {
-    static int[][] graph;
-    static int N, M;
-    static int[] dx = {1,-1,0,0, 1, 1, -1, -1};
-    static int[] dy = {0,0,1,-1, 1, -1, -1, 1};
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        StringTokenizer st1 = new StringTokenizer(br.readLine(), " ");
-        N = Integer.parseInt(st1.nextToken());
-        M = Integer.parseInt(st1.nextToken());
+        int N = Integer.parseInt(br.readLine());
 
-        graph = new int[N][M];
-        int max = 0;
-        for(int i =0 ; i < graph.length; i++) {
+        Info[] infos = new Info[N];
+        for(int i =0 ; i < infos.length; i++) {
             StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-            for(int j = 0; j < graph[i].length; j++) {
-                graph[i][j] = Integer.parseInt(st.nextToken());
-                max = Math.max(max, graph[i][j]);
-            }
+            int input_dur = Integer.parseInt(st.nextToken());
+            int input_end =  Integer.parseInt(st.nextToken());
+            infos[i] = new Info(i, input_dur, input_end);
         }
+        Arrays.sort(infos);
 
-        int count = 0;
-        boolean[][] checked = new boolean[N][M];
-        for(int n = max; n >= 1; n--) {
-            for(int i = 0; i < graph.length; i++) {
-                for(int j =0 ; j < graph[i].length; j++) {
-                    if(graph[i][j] == n && !checked[i][j]) {
-                        if(bfs(i, j, n)) {
-                            check(i,j,n, checked);
-                            count++;
-                        }
-                    }
-                }
+        int now = infos[0].end;
+        for(Info info : infos) {
+            int dur = info.dur;
+            int end = info.end;
+            if(end < now) {
+                now = (end - dur);
+            } else {
+                now -= dur;
             }
         }
-        System.out.println(count);
+        if(now < 0) {
+            System.out.println(-1);
+            return;
+        }
+        System.out.println(now);
     }
-    private static void check(int sx, int sy, int n, boolean[][] checked) {
-        Queue<int[]> queue = new LinkedList<>();
-        queue.add(new int[]{sx,sy});
+}
 
-        while (!queue.isEmpty()) {
-            int[] cur = queue.poll();
-            int x = cur[0];
-            int y = cur[1];
+class Info implements Comparable<Info> {
+    int order;
+    int dur;
+    int end;
 
-            checked[x][y] = true;
-
-            for(int i =0 ; i < 8; i++) {
-                int nx = x + dx[i];
-                int ny = y + dy[i];
-                if(nx >= N || nx < 0 || ny >= M || ny < 0) continue;
-                if(graph[nx][ny] == n && !checked[nx][ny]) {
-                    queue.add(new int[]{nx, ny});
-                }
-            }
-        }
+    Info(int order, int dur, int end) {
+        this.order = order;
+        this.dur = dur;
+        this.end = end;
     }
 
-    private static boolean bfs(int sx, int sy, int n) {
-        Queue<int[]> queue = new LinkedList<>();
-        queue.add(new int[]{sx, sy});
-        boolean[][] visited = new boolean[N][M];
-        visited[sx][sy] = true;
-
-        while(!queue.isEmpty()) {
-            int[] cur = queue.poll();
-            int x = cur[0];
-            int y = cur[1];
-
-            if (graph[x][y] > n) {
-                return false;
-            }
-
-            if (graph[x][y] < n) {
-                continue;
-            }
-
-            for (int i = 0; i < 8; i++) {
-                int nx = x + dx[i];
-                int ny = y + dy[i];
-
-                if (nx >= N || nx < 0 || ny >= M || ny < 0 || visited[nx][ny]) {
-                    continue;
-                }
-                visited[nx][ny] = true;
-                queue.add(new int[]{nx, ny});
-            }
-        }
-        return true;
+    @Override
+    public int compareTo(Info o) {
+        return o.end - this.end;
     }
-
 }
