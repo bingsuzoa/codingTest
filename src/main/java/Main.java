@@ -1,54 +1,136 @@
+import java.math.BigInteger;
 import java.util.*;
 import java.io.*;
 
 class Main {
-    static int N,M;
-    static char[][] graph;
+    static int[] graph;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-        N = Integer.parseInt(st.nextToken());
-        M = Integer.parseInt(st.nextToken());
-        graph = new char[N * 2][M * 2];
+        String input = br.readLine().trim();
 
-        for(int i = 0; i < N; i++) {
-            String input = br.readLine();
-            for(int j = 0; j < graph[i].length; j++) {
-                graph[i][j] = input.charAt(j % M);
-            }
-        }
-
-        for(int i = N; i < graph.length; i++) {
-            for(int j = 0; j < graph[i].length; j++) {
-                graph[i][j] = graph[i-N][j];
-            }
-        }
-
-        long[] answer = new long[26];
-        Map<Character, Integer> map = new HashMap<>();
-        int idx = 0;
-        for(char i = 'A'; i <= 'Z'; i++) {
-            map.put(i, idx++);
-        }
-
-        int realN = graph.length;
-        int realM = graph[0].length;
+        graph = new int[input.length()];
         for(int i = 0; i < graph.length; i++) {
-            for(int j = 0; j < graph[i].length; j++) {
-                char c = graph[i][j];
-                int cIdx = map.get(c);
+            graph[i] = input.charAt(i) -'0';
+        }
 
-                long count = (i + 1) * (j + 1) * (realN - i) * (realM - j);
-                answer[cIdx] += count;
+        if(onlyNine()) {
+            System.out.println(printOnlyNine());
+            return;
+        }
+
+        int mid = graph.length / 2;
+        if(graph.length % 2 != 0) {
+            calculateWhenOdd(mid, mid);
+        } else {
+            calculateWhenEven(mid - 1, mid);
+        }
+    }
+    private static void calculateWhenEven(int idx, int other) {
+        if(idx < 0) {
+            return;
+        }
+
+        int[] temp = new int[graph.length];
+        for(int i = 0; i < idx; i++) {
+            temp[i] = graph[i];
+            temp[graph.length - 1 - i] = graph[i];
+        }
+        int mid = graph[idx];
+        for(int i = mid; i < 10; i++) {
+            temp[idx] = i;
+            temp[other] = i;
+            for(int n = idx + 1; n < other; n++) {
+                temp[n] = 0;
+            }
+            if(compare(temp)) {
+                System.out.println(getString(temp));
+                return;
             }
         }
+        calculateWhenEven(idx -1, other + 1);
+    }
 
-        StringBuilder sb = new StringBuilder();
-        for(long value : answer) {
-            sb.append(value).append("\n");
+    private static void calculateWhenOdd(int idx, int other) {
+        if(idx < 0) {
+            return;
         }
-        System.out.println(sb);
+
+        if(idx == other) {
+            int[] temp= new int[graph.length];
+            for(int i = 0; i < graph.length/2; i++) {
+                temp[i] = graph[i];
+                temp[graph.length -1 -i] = graph[i];
+            }
+            int mid = graph[idx];
+            for(int i = mid; i < 10; i++) {
+                temp[idx] = i;
+                if(compare(temp)) {
+                    System.out.println(getString(temp));
+                    return;
+                }
+            }
+            calculateWhenOdd(idx -1, other + 1);
+        } else {
+            int[] temp = new int[graph.length];
+            for(int i = 0; i < idx; i++) {
+                temp[i] = graph[i];
+                temp[graph.length - 1 - i] = graph[i];
+            }
+            int mid = graph[idx];
+            for(int i = mid; i < 10; i++) {
+                temp[idx] = i;
+                temp[other] = i;
+                for(int n = idx + 1; n < other; n++) {
+                    temp[n] = 0;
+                }
+                if(compare(temp)) {
+                    System.out.println(getString(temp));
+                    return;
+                }
+            }
+            calculateWhenOdd(idx -1, other + 1);
+        }
+    }
+    private static boolean compare(int[] temp) {
+        for(int i =0 ; i < temp.length; i++) {
+            if(graph[i] < temp[i]) {
+                return true;
+            }
+            if(graph[i] > temp[i]) {
+                return false;
+            }
+        }
+        return false;
+    }
+
+    private static String getString(int[] temp) {
+        StringBuilder graphInput = new StringBuilder();
+        for(int v : temp) {
+            graphInput.append(v);
+        }
+        return graphInput.toString();
+    }
+
+    private static boolean onlyNine() {
+        for(int i = 0; i < graph.length; i++) {
+            if(graph[i] != 9) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private static String printOnlyNine() {
+        StringBuilder sb = new StringBuilder();
+        for(int i = 0; i <= graph.length; i++) {
+            if(i == 0 || i == graph.length) {
+                sb.append('1');
+            } else {
+                sb.append('0');
+            }
+        }
+        return sb.toString();
     }
 }
