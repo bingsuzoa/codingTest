@@ -1,136 +1,60 @@
-import java.math.BigInteger;
 import java.util.*;
 import java.io.*;
 
 class Main {
-    static int[] graph;
-
+    static double N, M;
+    static double[][][] dp;
+    static Set<Integer> set = new HashSet<>();
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        String input = br.readLine().trim();
+        N = Integer.parseInt(br.readLine()) * 0.01;
+        M = Integer.parseInt(br.readLine()) * 0.01;
 
-        graph = new int[input.length()];
-        for(int i = 0; i < graph.length; i++) {
-            graph[i] = input.charAt(i) -'0';
-        }
+        dp = new double[19][19][19];
+        init();
 
-        if(onlyNine()) {
-            System.out.println(printOnlyNine());
-            return;
-        }
+        set.add(2);
+        set.add(3);
+        set.add(5);
+        set.add(7);
+        set.add(11);
+        set.add(13);
+        set.add(17);
 
-        int mid = graph.length / 2;
-        if(graph.length % 2 != 0) {
-            calculateWhenOdd(mid, mid);
-        } else {
-            calculateWhenEven(mid - 1, mid);
-        }
-    }
-    private static void calculateWhenEven(int idx, int other) {
-        if(idx < 0) {
-            return;
-        }
-
-        int[] temp = new int[graph.length];
-        for(int i = 0; i < idx; i++) {
-            temp[i] = graph[i];
-            temp[graph.length - 1 - i] = graph[i];
-        }
-        int mid = graph[idx];
-        for(int i = mid; i < 10; i++) {
-            temp[idx] = i;
-            temp[other] = i;
-            for(int n = idx + 1; n < other; n++) {
-                temp[n] = 0;
-            }
-            if(compare(temp)) {
-                System.out.println(getString(temp));
-                return;
-            }
-        }
-        calculateWhenEven(idx -1, other + 1);
-    }
-
-    private static void calculateWhenOdd(int idx, int other) {
-        if(idx < 0) {
-            return;
-        }
-
-        if(idx == other) {
-            int[] temp= new int[graph.length];
-            for(int i = 0; i < graph.length/2; i++) {
-                temp[i] = graph[i];
-                temp[graph.length -1 -i] = graph[i];
-            }
-            int mid = graph[idx];
-            for(int i = mid; i < 10; i++) {
-                temp[idx] = i;
-                if(compare(temp)) {
-                    System.out.println(getString(temp));
-                    return;
+        double result = 0;
+        for(int i = 0; i < dp[18].length; i++) {
+            for(int j = 0; j < dp[18][i].length; j++) {
+                if(set.contains(i) || set.contains(j)) {
+                    result += dp[18][i][j];
                 }
             }
-            calculateWhenOdd(idx -1, other + 1);
-        } else {
-            int[] temp = new int[graph.length];
-            for(int i = 0; i < idx; i++) {
-                temp[i] = graph[i];
-                temp[graph.length - 1 - i] = graph[i];
-            }
-            int mid = graph[idx];
-            for(int i = mid; i < 10; i++) {
-                temp[idx] = i;
-                temp[other] = i;
-                for(int n = idx + 1; n < other; n++) {
-                    temp[n] = 0;
+        }
+        System.out.printf("%.7f", result);
+    }
+
+    private static void init() {
+        dp[0][0][0] = 1.0;
+
+        for(int round = 1; round < dp.length; round++) {
+            for(int n = 0; n <= round; n++) {
+                for(int m = 0; m <= round; m++) {
+                    //n 골, m 골
+                    if(n - 1 >= 0 && m - 1 >= 0) {
+                        dp[round][n][m] += dp[round-1][n-1][m-1] * N * M;
+                    }
+                    //n 골, m 무골
+                    if(n - 1 >= 0) {
+                        dp[round][n][m] += dp[round-1][n-1][m] * (N) * (1 - M);
+                    }
+                    //무골, 골
+                    if(m-1 >= 0) {
+                        dp[round][n][m] += dp[round-1][n][m-1] * (1-N) * M;
+                    }
+                    //무골 무골
+                    dp[round][n][m] += dp[round-1][n][m] * (1-N)* (1-M);
                 }
-                if(compare(temp)) {
-                    System.out.println(getString(temp));
-                    return;
-                }
-            }
-            calculateWhenOdd(idx -1, other + 1);
-        }
-    }
-    private static boolean compare(int[] temp) {
-        for(int i =0 ; i < temp.length; i++) {
-            if(graph[i] < temp[i]) {
-                return true;
-            }
-            if(graph[i] > temp[i]) {
-                return false;
             }
         }
-        return false;
-    }
-
-    private static String getString(int[] temp) {
-        StringBuilder graphInput = new StringBuilder();
-        for(int v : temp) {
-            graphInput.append(v);
-        }
-        return graphInput.toString();
-    }
-
-    private static boolean onlyNine() {
-        for(int i = 0; i < graph.length; i++) {
-            if(graph[i] != 9) {
-                return false;
-            }
-        }
-        return true;
-    }
-
-    private static String printOnlyNine() {
-        StringBuilder sb = new StringBuilder();
-        for(int i = 0; i <= graph.length; i++) {
-            if(i == 0 || i == graph.length) {
-                sb.append('1');
-            } else {
-                sb.append('0');
-            }
-        }
-        return sb.toString();
     }
 }
