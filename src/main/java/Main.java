@@ -2,59 +2,63 @@ import java.util.*;
 import java.io.*;
 
 class Main {
-    static double N, M;
-    static double[][][] dp;
-    static Set<Integer> set = new HashSet<>();
+    static List<Node> results;
+    
+
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        N = Integer.parseInt(br.readLine()) * 0.01;
-        M = Integer.parseInt(br.readLine()) * 0.01;
+        int N = Integer.parseInt(br.readLine());
 
-        dp = new double[19][19][19];
-        init();
+        results = new ArrayList<>();
+        results.add(new Node(0, ""));
+        while(N > 0) {
+            String input = br.readLine();
+            if (input == null || input.isEmpty()) continue;
+            String[] array = input.split(" ");
+            if(array[0].contains("type")) {
+                String value = array[1].trim();
+                int second = Integer.parseInt(array[2].trim());
 
-        set.add(2);
-        set.add(3);
-        set.add(5);
-        set.add(7);
-        set.add(11);
-        set.add(13);
-        set.add(17);
+                String lastValue = results.get(results.size() -1).value;
+                results.add(new Node(second, lastValue + value));
 
-        double result = 0;
-        for(int i = 0; i < dp[18].length; i++) {
-            for(int j = 0; j < dp[18][i].length; j++) {
-                if(set.contains(i) || set.contains(j)) {
-                    result += dp[18][i][j];
+            }
+            else if(array[0].contains("undo")) {
+                int to = Integer.parseInt(array[1].trim());
+                int from = Integer.parseInt(array[2].trim());
+                int idx = results.size() - 1;
+                int goal = from - to - 1;
+
+                boolean isFlag = false;
+                while(idx >= 0) {
+                    Node cur = results.get(idx);
+                    int sec = cur.sec;
+                    String value = cur.value;
+                    if(goal < sec) {
+                        idx--;
+                    } else {
+                        results.add(new Node(from, value));
+                        isFlag = true;
+                        break;
+                    }
+                }
+                if(!isFlag) {
+                    results.add(new Node(from, ""));
                 }
             }
+            N--;
         }
-        System.out.printf("%.7f", result);
+        System.out.println(results.get(results.size() - 1).value);
     }
+}
 
-    private static void init() {
-        dp[0][0][0] = 1.0;
+class Node {
+    int sec;
+    String value;
 
-        for(int round = 1; round < dp.length; round++) {
-            for(int n = 0; n <= round; n++) {
-                for(int m = 0; m <= round; m++) {
-                    //n 골, m 골
-                    if(n - 1 >= 0 && m - 1 >= 0) {
-                        dp[round][n][m] += dp[round-1][n-1][m-1] * N * M;
-                    }
-                    //n 골, m 무골
-                    if(n - 1 >= 0) {
-                        dp[round][n][m] += dp[round-1][n-1][m] * (N) * (1 - M);
-                    }
-                    //무골, 골
-                    if(m-1 >= 0) {
-                        dp[round][n][m] += dp[round-1][n][m-1] * (1-N) * M;
-                    }
-                    //무골 무골
-                    dp[round][n][m] += dp[round-1][n][m] * (1-N)* (1-M);
-                }
-            }
-        }
+    public Node(int sec, String value) {
+        this.sec = sec;
+        this.value = value;
     }
 }
