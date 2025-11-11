@@ -1,43 +1,64 @@
 import java.util.*;
 import java.io.*;
-import java.util.stream.StreamSupport;
 
 class Main {
-    static long l, r;
-    static int k;
+    static int[] graph;
+    static int[] result;
+    static boolean found;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        l = Long.parseLong(br.readLine());
-        r = Long.parseLong(br.readLine());
-        k = Integer.parseInt(br.readLine());
+        int N = Integer.parseInt(br.readLine());
+        graph = new int[N];
+        result = new int[N * 2];
+        found = false;
 
-        if(k % 2 != 0) {
-            int minM = (k + 1)/2;
+        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+        for(int i = 0; i < N; i++) {
+            graph[i] = Integer.parseInt(st.nextToken());
+        }
+        Arrays.sort(graph);
+        Arrays.fill(result, -1);
+        dfs(new boolean[N], 0);
 
-            long left = (l + k - 1) / k; // ceil(l / k)
-            long right = r / k;          // floor(r / k)
+        if(!found) {
+            System.out.println(-1);
+        }
+    }
 
-            if(right < minM) {
-                System.out.println(0);
-                return;
+    private static void dfs(boolean[] visited, int cur) {
+        if(found) {
+            return;
+        }
+
+        if(cur == result.length) {
+            found = true;
+            StringBuilder sb = new StringBuilder();
+            for(int i = 0; i < result.length; i++) {
+                sb.append(result[i]).append(" ");
             }
-            System.out.println(right - Math.max(minM, left) + 1);
-        } else {
-            int minM = k + 1;
+            System.out.println(sb);
+            return;
+        }
+        if(result[cur] != -1) {
+            dfs(visited, cur + 1);
+            return;
+        }
 
-            long halfK = k / 2;
-            long left = (l + halfK - 1) / halfK; // ceil(l / (k/2))
-            long right = r / halfK;              // floor(r / (k/2))
-
-            if(right < minM) {
-                System.out.println(0);
-                return;
+        for(int i = 0; i < graph.length; i++) {
+            if(!visited[i]) {
+                int pair = cur + graph[i] + 1;
+                if(pair >= result.length || result[pair] != -1) {
+                    continue;
+                }
+                visited[i] = true;
+                result[cur] = result[pair] = graph[i];
+                dfs(visited, cur + 1);
+                result[cur] = result[pair] = -1;
+                visited[i] = false;
+                if(found) return;
             }
-
-//            int bias = (k == 4 && right >= 6 && left <= 6) ? 1 : 0;
-            System.out.println(right - Math.max(minM, left) + 1);
         }
     }
 }
