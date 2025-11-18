@@ -2,49 +2,73 @@ import java.util.*;
 import java.io.*;
 
 class Main {
-    static String word;
+    static String[] board;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        StringTokenizer st = new StringTokenizer(br.readLine(), " ");
+        int N = Integer.parseInt(br.readLine());
+        board = new String[N];
 
-        int N = Integer.parseInt(st.nextToken());
-        int M = Integer.parseInt(st.nextToken());
-        String word = br.readLine();
-        String text = br.readLine();
-
-        int[] wArr = new int[52];
-        for(int i = 0; i < word.length(); i++) {
-            putChar(word.charAt(i), wArr, 1);
+        for(int i = 0; i < board.length; i++) {
+            String input = br.readLine();
+            input = change(input, 'k', 'c');
+            input = changeString(input, 'g', 'z');
+            board[i] = input;
         }
-        int[] tArr = new int[52];
+        Arrays.sort(board);
 
-        int size = 0;
-        int cnt = 0;
-        int start = 0;
-        for(int i = 0; i < text.length(); i++) {
-            char c = text.charAt(i);
-            putChar(c, tArr, 1);
-            size++;
-
-            if(size == word.length()) {
-                if(Arrays.equals(wArr, tArr)) {
-                    cnt++;
+        for(int i = 0; i < board.length; i++) {
+            String input = board[i];
+            input = change(input, 'c', 'k');
+            input = changeString(input, 'z', 'g');
+            System.out.println(input);
+        }
+    }
+    private static String changeString(String input, char from, char to) {
+        char[] array = new char[input.length()];
+        for(int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if(c == 'n') {
+                if(i + 1 < input.length()) {
+                    char p = input.charAt(i+1);
+                    if(p == from) {
+                        array[i] = 'n';
+                        array[i+1] = to;
+                        i = i+1;
+                    } else {
+                        array[i] = 'n';
+                        array[i+1] = p;
+                        i = i+1;
+                    }
+                } else {
+                    array[i] = 'n';
                 }
-                putChar(text.charAt(start), tArr, -1);
-                size--;
-                start++;
+            } else {
+                array[i] = c;
             }
         }
-        System.out.println(cnt);
+        StringBuilder sb = new StringBuilder();
+        for(char c : array) {
+            sb.append(c);
+        }
+        return sb.toString();
     }
 
-    private static void putChar(char c, int[] arr, int num) {
-        if(c >= 'a' && c <= 'z') {
-            arr[c - 'a'] += num;
-        } else {
-            arr[c - 'A' + 26] += num;
+    private static String change(String input, char from, char to) {
+        char[] array = new char[input.length()];
+        for(int i = 0; i < input.length(); i++) {
+            char c = input.charAt(i);
+            if(c == from) {
+                array[i] = to;
+            } else {
+                array[i] = c;
+            }
         }
+        StringBuilder sb = new StringBuilder();
+        for(char c : array) {
+            sb.append(c);
+        }
+        return sb.toString();
     }
 }
