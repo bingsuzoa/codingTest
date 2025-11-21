@@ -1,70 +1,45 @@
 import java.util.*;
 import java.io.*;
 
-
 class Main {
-    static int D, N;
-    static long[] dArr;
-    static long[] nArr;
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException{
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        StringTokenizer st1 = new StringTokenizer(br.readLine());
-        D = Integer.parseInt(st1.nextToken());
-        N = Integer.parseInt(st1.nextToken());
+        int T = Integer.parseInt(br.readLine());
 
-        StringTokenizer d = new StringTokenizer(br.readLine());
-        StringTokenizer n = new StringTokenizer(br.readLine());
+        while(T --> 0)  {
+            String input = br.readLine();
 
-        dArr = new long[D];
-        nArr = new long[N];
-
-        for(int i = 0; i < dArr.length; i++) {
-            dArr[i] = Long.parseLong(d.nextToken());
-        }
-        for(int i =0 ; i < nArr.length; i++) {
-            nArr[i] = Long.parseLong(n.nextToken());
-        }
-
-        long min = Long.MAX_VALUE;
-        for(int i = 0; i < dArr.length; i++) {
-            min = Math.min(min, dArr[i]);
-            if(min < dArr[i]) {
-                dArr[i] = min;
+            if(input.length() == 1) {
+                System.out.println("YES");
+                continue;
             }
-        }
 
-        int idx = 0;
-        int answer = 0;
-        long standard = nArr[0];
-
-        boolean flag = false;
-        for(int i = dArr.length-1; i >= 0; i--) {
-            if(idx == 0) {
-                if(nArr[idx] <= dArr[i]) {
-                    idx++;
-                }
+            if(isPass(input, 0, input.length() - 1)) {
+                System.out.println("YES");
             } else {
-                if (nArr[idx] <= standard) {
-                    idx++;
-                } else {
-                    if(nArr[idx] <= dArr[i]) {
-                        standard = Math.max(standard, nArr[idx]);
-                        idx++;
-                    }
-                }
+                System.out.println("NO");
             }
-            if(idx == nArr.length) {
-                answer = i+1;
-                flag = true;
-                break;
-            }
-        }
-        if(!flag) {
-            System.out.println(0);
-        } else {
-            System.out.println(answer);
         }
     }
-}
+
+    private static boolean isPass(String input, int left, int right) {
+        int mid = (left + right) / 2;
+        if(right - left >= 3) {
+            if(!isPass(input, left, mid -1)) {
+                return false;
+            }
+            if(!isPass(input, mid + 1, right)) {
+                return false;
+            }
+        }
+
+        for(int i = left, j = right; i < mid; i++, j--) {
+            if(input.charAt(i) == input.charAt(j)) {
+                return false;
+            }
+        }
+        return true;
+    }
+}   
