@@ -2,60 +2,79 @@ import java.util.*;
 import java.io.*;
 
 class Main {
-    static int[] board;
-    static int n;
+    static long[] graph = new long[10];
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        n = Integer.parseInt(br.readLine());
-        board = new int[n + 1];
-
-        for (int i = 1; i < board.length; i++) {
-            int cur =  board.length -1 - i;
-            for(int j = cur - 1; j >= 1; j--) {
-                cur *= j;
-            }
-            board[i] = cur;
-        }
-
         StringTokenizer st = new StringTokenizer(br.readLine());
-        int k = Integer.parseInt(st.nextToken());
-        if(k == 1) {
-            long goal = Long.parseLong(st.nextToken());
-            int[] answer = new int[n];
-            searchOne(answer, goal, 0, 1);
-            for(int value : answer) {
-                System.out.print(value + " ");
-            }
-        }
-    }
+        long N = Long.parseLong(st.nextToken());
+        long k = Long.parseLong(st.nextToken());
 
-    private static void searchOne(int[] answer, long goal, int cur, int bitMask) {
-        if(cur == answer.length - 1) {
-            for(int i = 1; i <= n; i++) {
-                int curBitMask = 1 << i;
-                if((curBitMask & bitMask) == 0) {
-                    answer[cur] = i;
-                    break;
-                }
-            }
+        int pos = checkPos(N);
+        setGraph();
+        if(overK(N, k, pos)) {
+            System.out.println(-1);
             return;
         }
 
-        for(int i = 1; i <= n; i++) {
-            int curBitMask = 1 << i;
-            int now = board[i];
-            if(goal <= now && (bitMask & curBitMask) == 0) {
-                answer[cur] = i;
-                searchOne(answer, goal, cur + 1, bitMask | curBitMask);
-                return;
+        long sum = 0;
+        int cur = 0;
+        for(int i = 1; i < graph.length; i++) {
+            cur = i;
+            if(sum + graph[i] > k) {
+                break;
             }
-            else if(goal > now && (bitMask & curBitMask) == 0) {
-                goal -= now;
-            }
+            sum += graph[i];
         }
+        k -= sum;
 
+        long quad = k / cur;
+        long remain = k %  cur;
+
+        long value = (long)Math.pow(10, cur-1);
+        value = value + quad - 1;
+
+        if(remain == 0) {
+            System.out.println(value % 10);
+            return;
+        }
+        value ++;
+        String s = String.valueOf(value);
+        System.out.println(s.charAt((int)(remain-1)));
+    }
+
+    private static boolean overK(long N, long k, int pos) {
+        long sum = 0;
+        for(int i= 1; i < pos; i++) {
+            sum += graph[i];
+        }
+        long num = (long)Math.pow(10, pos-1);
+        N = N - num + 1;
+        sum += (N * pos);
+        if(sum < k) {
+            return true;
+        }
+        return false;
+    }
+
+    private static int checkPos(long N) {
+        int pos = 0;
+        while(true) {
+            if(N / (long)Math.pow(10, pos) == 0) {
+                break;
+            }
+            pos ++;
+        }
+        return pos;
+    }
+
+    private static void setGraph() {
+        for(int i = 1; i < graph.length; i++) {
+            long left = (long)Math.pow(10, i);
+            long right = (long)Math.pow(10, i-1);
+            graph[i] = (left - right) * i;
+        }
     }
 
 }
