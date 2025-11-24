@@ -2,67 +2,57 @@ import java.util.*;
 import java.io.*;
 
 class Main {
-    static List<String>[] list;
-    static String input;
-    static Queue<String> queue;
-
-    static String answer;
-    static int max = 0;
+    static List<int[]>[] list;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        int N = Integer.parseInt(st.nextToken());
-        input = st.nextToken();
+        int N = Integer.parseInt(br.readLine());
+        int M = Integer.parseInt(br.readLine());
 
-        list = new ArrayList[81];
-        for(int i =0 ; i < list.length; i++) {
+        list = new ArrayList[N+1];
+        for(int i = 0; i < list.length; i++) {
             list[i] = new ArrayList<>();
         }
-        for(int i = 0; i < N; i++) {
-            String s = br.readLine();
-            list[s.length()].add(s);
+
+        while(M --> 0) {
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            int s = Integer.parseInt(st.nextToken());
+            int e = Integer.parseInt(st.nextToken());
+            int c = Integer.parseInt(st.nextToken());
+            list[s].add(new int[]{e, c});
         }
 
-        queue = new LinkedList<>();
-        queue.add(input);
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        int start = Integer.parseInt(st.nextToken());
+        int end = Integer.parseInt(st.nextToken());
 
-        while(!queue.isEmpty()) {
-            String cur = queue.poll();
+        PriorityQueue<int[]> pq = new PriorityQueue<>((o1,o2) -> {
+            return o1[1] - o2[1];
+        });
 
-            for(String next : list[cur.length() + 1]) {
-                int left = 0;
-                int right = 0;
-                int oppt = 0;
+        int[] costs = new int[N+1];
+        Arrays.fill(costs, Integer.MAX_VALUE);
 
-                while(left < cur.length() && right < next.length()) {
-                    if(cur.charAt(left) != next.charAt(right)) {
-                        if(oppt < 1) {
-                            oppt++;
-                            right++;
-                        } else {
-                            break;
-                        }
-                    } else {
-                        left ++;
-                        right ++;
-                    }
-                }
-                if(left == cur.length() && oppt <= 1) {
-                    if(max < next.length()) {
-                        max = next.length();
-                        answer = next;
-                    }
-                    queue.add(next);
+        pq.add(new int[]{start, 0});
+        costs[0] = 0;
+
+        while(!pq.isEmpty()) {
+            int[] from = pq.poll();
+            int cost = from[1];
+
+            if(costs[from[0]] < cost) {
+                continue;
+            }
+
+            for(int[] to : list[from[0]]) {
+                int next = to[0];
+                if(costs[next] > cost + to[1]) {
+                    costs[next] = cost + to[1];
+                    pq.add(new int[]{next, costs[next]});
                 }
             }
         }
-
-        if(max == 0) {
-            System.out.println(input);
-        } else {
-            System.out.println(answer);
-        }
+        System.out.println(costs[end]);
     }
 }
