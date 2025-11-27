@@ -1,81 +1,83 @@
-import java.util.*;
 import java.io.*;
 
 class Main {
+    static int[] graph;
+    static long[] dp;
+    static int MOD = 1000000;
+
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        int K = Integer.parseInt(br.readLine());
-
-        int[] pair = new int[4];
-        int[] array = new int[4];
-
-        StringBuilder sb = new StringBuilder();
-        while(K --> 0) {
-            StringTokenizer st = new StringTokenizer(br.readLine(), " ");
-
-            for (int i = 0; i < 4; i++) {
-                array[i] = Integer.parseInt(st.nextToken());
-            }
-
-            for (int i = 0; i < 4; i++) {
-                pair[i] = Integer.parseInt(st.nextToken());
-            }
-
-            boolean flag = false;
-            outer:
-            for(int i = 0; i < 4; i++) {
-                for(int j = 0; j < 4; j++) {
-                    if(array[i] == pair[j]) {
-                        int[] a1 = new int[3];
-                        int[] atemp= getOrder(i);
-                        for (int k = 0; k < a1.length; k++) {
-                            a1[k] = array[atemp[k]];
-                        }
-
-                        int[] b1 = new int[3];
-                        int[] btemp = getOrder(j);
-                        for (int k = 0; k < b1.length; k++) {
-                            b1[k] = pair[btemp[k]];
-                        }
-
-                        for(int k = 0; k < 3; k++) {
-                            int first = b1[k];
-                            int second = b1[(k + 1) % 3];
-                            int third = b1[(k + 2) % 3];
-
-                            if (a1[0] == first && a1[1] == second && a1[2] == third) {
-                                flag = true;
-                                break outer;
-                            }
-                        }
-                    }
-                }
-            }
-            if(!flag) {
-                sb.append(0).append("\n");
-            } else {
-                sb.append(1).append("\n");
-            }
+        String input = br.readLine();
+        graph = new int[input.length()];
+        for(int i = 0; i < input.length(); i++) {
+            graph[i] = input.charAt(i) - '0';
         }
-        System.out.println(sb.toString().trim());
+
+        dp = new long[input.length() + 1];
+        init();
+
+        for(int i = 3; i < dp.length; i++) {
+            long befo = graph[i-2];
+            long cur = graph[i-1];
+            if(!checkOne(cur) && !checkTwo(befo, cur)) {
+                System.out.println(0);
+                return;
+            }
+
+            if(checkOne(cur)) {
+                dp[i] += dp[i-1] % MOD;
+            }
+            if(checkTwo(befo, cur)) {
+                dp[i] += dp[i-2] % MOD;
+            }
+            dp[i] %= MOD;
+        }
+
+        if(graph.length > 2) {
+            System.out.println(dp[dp.length - 1] % MOD);
+        }
     }
 
-    private static int[] getOrder(int idx) {
-        int[] zero = new int[]{1,2,3};
-        int[] one = new int[]{0,3,2};
-        int[] two = new int[]{0,1,3};
-        int[] three = new int[]{0,2,1};
-        if(idx == 0) {
-            return zero;
+    private static boolean checkOne(long num) {
+        if(num == 0L) {
+            return false;
         }
-        if(idx == 1) {
-            return one;
+        return true;
+    }
+
+    private static boolean checkTwo(long one, long two) {
+        long num = one * 10 + two;
+        if(num >= 10L && num <= 26L) {
+            return true;
         }
-        if(idx == 2) {
-            return two;
+        return false;
+    }
+
+    private static void init() {
+        dp[0] = 1;
+        if(graph.length == 0) {
+            System.out.println(dp[0]);
+            return;
         }
-        return three;
+
+        if(checkOne(graph[0])) {
+            dp[1] += dp[0];
+        }
+        if(graph.length == 1) {
+            System.out.println(dp[1]);
+            return;
+        }
+
+        if(checkOne(graph[1])) {
+            dp[2] += dp[1];
+        }
+        if(checkTwo(graph[0], graph[1])) {
+            dp[2] += dp[0];
+        }
+        if(graph.length == 2) {
+            System.out.println(dp[2]);
+        }
     }
 }
