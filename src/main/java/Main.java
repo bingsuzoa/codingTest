@@ -1,83 +1,45 @@
 import java.io.*;
+import java.util.*;
 
 class Main {
-    static int[] graph;
-    static long[] dp;
-    static int MOD = 1000000;
-
+    static int N;
+    static StringBuilder sb;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        String input = br.readLine();
-        graph = new int[input.length()];
-        for(int i = 0; i < input.length(); i++) {
-            graph[i] = input.charAt(i) - '0';
+        N = Integer.parseInt(br.readLine());
+        sb = new StringBuilder();
+
+        for(int i = 2; i < 10; i++) {
+            if(isPrime(i)) {
+                dfs(i, 1);
+            }
         }
+        System.out.println(sb.toString().trim());
+    }
 
-        dp = new long[input.length() + 1];
-        init();
-
-        for(int i = 3; i < dp.length; i++) {
-            long befo = graph[i-2];
-            long cur = graph[i-1];
-            if(!checkOne(cur) && !checkTwo(befo, cur)) {
-                System.out.println(0);
-                return;
-            }
-
-            if(checkOne(cur)) {
-                dp[i] += dp[i-1] % MOD;
-            }
-            if(checkTwo(befo, cur)) {
-                dp[i] += dp[i-2] % MOD;
-            }
-            dp[i] %= MOD;
+    private static void dfs(int num, int len) {
+        if(len == N) {
+            sb.append(num).append("\n");
+            return;
         }
-
-        if(graph.length > 2) {
-            System.out.println(dp[dp.length - 1] % MOD);
+        num *= 10;
+        for(int i = 0; i < 10; i++) {
+            int result = num + i;
+            if(isPrime(result)) {
+                dfs(result, len + 1);
+            }
         }
     }
 
-    private static boolean checkOne(long num) {
-        if(num == 0L) {
-            return false;
+    private static boolean isPrime(int num) {
+        if(num < 2) return false;
+        for(int i = 2; i * i <= num; i++) {
+            if(num % i == 0) {
+                return false;
+            }
         }
         return true;
-    }
-
-    private static boolean checkTwo(long one, long two) {
-        long num = one * 10 + two;
-        if(num >= 10L && num <= 26L) {
-            return true;
-        }
-        return false;
-    }
-
-    private static void init() {
-        dp[0] = 1;
-        if(graph.length == 0) {
-            System.out.println(dp[0]);
-            return;
-        }
-
-        if(checkOne(graph[0])) {
-            dp[1] += dp[0];
-        }
-        if(graph.length == 1) {
-            System.out.println(dp[1]);
-            return;
-        }
-
-        if(checkOne(graph[1])) {
-            dp[2] += dp[1];
-        }
-        if(checkTwo(graph[0], graph[1])) {
-            dp[2] += dp[0];
-        }
-        if(graph.length == 2) {
-            System.out.println(dp[2]);
-        }
     }
 }
