@@ -4,39 +4,42 @@ import java.io.*;
 class Main {
     static List<int[]> list;
 
-
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         int N = Integer.parseInt(br.readLine());
         list = new ArrayList<>();
 
-        for(int i = 0; i < N; i++) {
+        for(int i =0 ; i < N; i++) {
             StringTokenizer st = new StringTokenizer(br.readLine());
             int x = Integer.parseInt(st.nextToken());
             int y = Integer.parseInt(st.nextToken());
             list.add(new int[]{x, y});
         }
-        list.add(new int[]{list.get(0)[0], list.get(0)[1]});
 
-        double answer;
-        long sum = 0;
-        int left = 0;
-        int right = 1;
-        while(right < list.size()) {
-            int[] first = list.get(left);
-            int[] second = list.get(right);
+        Collections.sort(list, (o1,o2) -> {
+            if(o1[0] == o2[0]) {
+                return o1[1] - o2[1];
+            }
+            return o1[0] - o2[0];
+        });
 
-            int lx = first[0];
-            int ly = first[1];
-            int rx = second[0];
-            int ry = second[1];
-            sum += ((long)lx * ry) - ((long)rx * ly);
-
-            left++;
-            right++;
+        int[] first = list.get(0);
+        int start = first[0];
+        int end = first[1];
+        long result = (end - start);
+        for(int i = 1; i < list.size(); i++) {
+            int[] temp = list.get(i);
+            if(end < temp[0]) {
+                start = temp[0];
+                end = temp[1];
+                result += (end - start);
+            }
+            else if(start <= temp[0] && end < temp[1]) {
+                result += (temp[1] - end);
+                end = temp[1];
+            }
         }
-        answer = Math.abs(sum) * 0.5;
-        System.out.printf("%.1f", answer);
+        System.out.println(result);
     }
 }
