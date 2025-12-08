@@ -2,42 +2,54 @@ import java.util.*;
 import java.io.*;
 
 class Main {
-    static int N, A, B;
-    static List<int[]> list = new ArrayList<>();
+    static String input, goal;
+    static Map<Character, List<Integer>> map = new HashMap<>();
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        StringTokenizer input = new StringTokenizer(br.readLine());
-        N = Integer.parseInt(input.nextToken());
-        A = Integer.parseInt(input.nextToken());
-        B = Integer.parseInt(input.nextToken());
+        input = br.readLine().toLowerCase();
+        goal = br.readLine().toLowerCase();
 
-        for(int i = 0; i < N; i++) {
-            StringTokenizer st = new StringTokenizer(br.readLine());
-            int x = Integer.parseInt(st.nextToken());
-            int y = Integer.parseInt(st.nextToken());
-            int z = Integer.parseInt(st.nextToken());
-            list.add(new int[]{x, y, z});
+        for(int i = 0; i < input.length(); i++){
+            char c = input.charAt(i);
+            map.putIfAbsent(c, new ArrayList<>());
+            map.get(c).add(i);
         }
 
-        int max = 0;
-        for(int i = 0; i < list.size(); i++) {
-            for(int j = 0; j < list.size(); j++) {
-                if(i == j) continue;
-                int[] array = list.get(i);
-                int sx = array[0];
-                int sy = array[1];
+        for(List<Integer> list : map.values()) {
+            Collections.sort(list);
+        }
 
-                int[] pair = list.get(j);
-                int ex = pair[0];
-                int ey = pair[1];
+        int startIdx = 0;
+        int count = 0;
+        while(startIdx < goal.length()) {
+            char sc = goal.charAt(startIdx);
+            List<Integer> list = map.get(sc);
 
-                if(Math.abs(ex - sx) + 1 <= A && Math.abs(sy - ey)  + 1 <= B) {
-                    max = Math.max(Math.abs(array[2] - pair[2]), max);
+            int maxLength = 0;
+            for(int idx : list) {
+                StringBuilder sb = new StringBuilder();
+                StringBuilder st = new StringBuilder();
+                int up = 0;
+                for(int i = idx; i < input.length(); i++) {
+                    sb.append(input.charAt(i));
+                    if(startIdx + up < goal.length()) {
+                        st.append(goal.charAt(startIdx + up));
+                    } else {
+                        st.append(goal.charAt(startIdx));
+                    }
+                    if(sb.toString().equals(st.toString())) {
+                        maxLength = Math.max(maxLength, sb.toString().length());
+                        up++;
+                    } else {
+                        break;
+                    }
                 }
             }
+            count++;
+            startIdx = startIdx + maxLength;
         }
-        System.out.println(max);
+        System.out.println(count);
     }
 }
