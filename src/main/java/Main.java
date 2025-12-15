@@ -2,43 +2,44 @@ import java.util.*;
 import java.io.*;
 
 class Main {
-    static int N;
-    static List<Integer> list = new ArrayList<>();
-    static List<Integer> answer = new ArrayList<>();
+    static int N, K;
+    static int[] graph;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         N = Integer.parseInt(br.readLine());
+        K = Integer.parseInt(br.readLine());
+        StringTokenizer st = new StringTokenizer(br.readLine());
 
-        boolean[] juseoks = new boolean[N+1];
+        graph = new int[N];
+        for(int i = 0; i < graph.length; i++) {
+            graph[i] = Integer.parseInt(st.nextToken());
+        }
+        Arrays.sort(graph);
 
-        int pow = 0;
-        while(true) {
-            if((int)Math.pow(2, pow) > N + N) {
+        boolean[] checked = new boolean[N];
+        PriorityQueue<int[]> pq = new PriorityQueue<>((o1, o2) -> {
+            return o2[2] - o1[2];
+        });
+
+        for(int i = 0; i < graph.length-1; i++) {
+            pq.add(new int[]{i, i+1, graph[i+1] - graph[i]});
+        }
+
+        while(!pq.isEmpty()) {
+            if(K > 1) {
+                pq.poll();
+                K--;
+            } else {
                 break;
             }
-            pow++;
         }
 
-        for(int i = 1; i < pow; i++) {
-            list.add((int)Math.pow(2, i));
+        int sum = 0;
+        while(!pq.isEmpty()) {
+            sum += pq.poll()[2];
         }
-
-        for(int i = N ; i >= 1; i--) {
-            for(int j = list.size() -1; j>= 0; j--) {
-                int pair = Math.abs(i - list.get(j));
-                if(pair == 0 || juseoks.length <= pair || juseoks[pair]) continue;
-                juseoks[pair] = true;
-                answer.add(pair);
-                break;
-            }
-        }
-
-        StringBuilder sb = new StringBuilder();
-        for(int i = answer.size() - 1; i >= 0; i-- ){
-            sb.append(answer.get(i)).append("\n");
-        }
-        System.out.println(sb.toString().trim());
+        System.out.println(sum);
     }
 }
