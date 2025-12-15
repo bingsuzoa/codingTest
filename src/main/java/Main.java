@@ -2,54 +2,43 @@ import java.util.*;
 import java.io.*;
 
 class Main {
-    static String input, goal;
-    static Map<Character, List<Integer>> map = new HashMap<>();
+    static int N;
+    static List<Integer> list = new ArrayList<>();
+    static List<Integer> answer = new ArrayList<>();
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        input = br.readLine().toLowerCase();
-        goal = br.readLine().toLowerCase();
+        N = Integer.parseInt(br.readLine());
 
-        for(int i = 0; i < input.length(); i++){
-            char c = input.charAt(i);
-            map.putIfAbsent(c, new ArrayList<>());
-            map.get(c).add(i);
-        }
+        boolean[] juseoks = new boolean[N+1];
 
-        for(List<Integer> list : map.values()) {
-            Collections.sort(list);
-        }
-
-        int startIdx = 0;
-        int count = 0;
-        while(startIdx < goal.length()) {
-            char sc = goal.charAt(startIdx);
-            List<Integer> list = map.get(sc);
-
-            int maxLength = 0;
-            for(int idx : list) {
-                StringBuilder sb = new StringBuilder();
-                StringBuilder st = new StringBuilder();
-                int up = 0;
-                for(int i = idx; i < input.length(); i++) {
-                    sb.append(input.charAt(i));
-                    if(startIdx + up < goal.length()) {
-                        st.append(goal.charAt(startIdx + up));
-                    } else {
-                        st.append(goal.charAt(startIdx));
-                    }
-                    if(sb.toString().equals(st.toString())) {
-                        maxLength = Math.max(maxLength, sb.toString().length());
-                        up++;
-                    } else {
-                        break;
-                    }
-                }
+        int pow = 0;
+        while(true) {
+            if((int)Math.pow(2, pow) > N + N) {
+                break;
             }
-            count++;
-            startIdx = startIdx + maxLength;
+            pow++;
         }
-        System.out.println(count);
+
+        for(int i = 1; i < pow; i++) {
+            list.add((int)Math.pow(2, i));
+        }
+
+        for(int i = N ; i >= 1; i--) {
+            for(int j = list.size() -1; j>= 0; j--) {
+                int pair = Math.abs(i - list.get(j));
+                if(pair == 0 || juseoks.length <= pair || juseoks[pair]) continue;
+                juseoks[pair] = true;
+                answer.add(pair);
+                break;
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for(int i = answer.size() - 1; i >= 0; i-- ){
+            sb.append(answer.get(i)).append("\n");
+        }
+        System.out.println(sb.toString().trim());
     }
 }
