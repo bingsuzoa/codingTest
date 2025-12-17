@@ -2,44 +2,37 @@ import java.util.*;
 import java.io.*;
 
 class Main {
-    static int N, K;
-    static int[] graph;
+    static int MOD = 1000000000;
+    static long[][] dp;
+
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        N = Integer.parseInt(br.readLine());
-        K = Integer.parseInt(br.readLine());
         StringTokenizer st = new StringTokenizer(br.readLine());
 
-        graph = new int[N];
-        for(int i = 0; i < graph.length; i++) {
-            graph[i] = Integer.parseInt(st.nextToken());
+        int N = Integer.parseInt(st.nextToken());
+        int K = Integer.parseInt(st.nextToken());
+
+        dp = new long[K + 1][N + 1];
+
+        for(int i = 1; i <= K; i++) {
+            dp[i][0] = 1;
         }
-        Arrays.sort(graph);
-
-        boolean[] checked = new boolean[N];
-        PriorityQueue<int[]> pq = new PriorityQueue<>((o1, o2) -> {
-            return o2[2] - o1[2];
-        });
-
-        for(int i = 0; i < graph.length-1; i++) {
-            pq.add(new int[]{i, i+1, graph[i+1] - graph[i]});
+        for(int i = 1; i <= N; i++) {
+            dp[1][i] = 1;
         }
 
-        while(!pq.isEmpty()) {
-            if(K > 1) {
-                pq.poll();
-                K--;
-            } else {
-                break;
+        for(int i = 2; i < dp.length; i++) {
+            for(int j = 1; j < dp[i].length; j++) {
+                long sum = 0;
+                for(int k = 0; k <= j; k++) {
+                    sum += (dp[i-1][j - k] * dp[1][k]) % MOD;
+                }
+                dp[i][j] = sum % MOD;
             }
         }
 
-        int sum = 0;
-        while(!pq.isEmpty()) {
-            sum += pq.poll()[2];
-        }
-        System.out.println(sum);
+        System.out.println(dp[K][N] % MOD);
     }
 }
