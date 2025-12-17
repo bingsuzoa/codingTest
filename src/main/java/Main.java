@@ -25,11 +25,7 @@ class Main {
 
         for(int i = 2; i < dp.length; i++) {
             for(int j = 1; j < dp[i].length; j++) {
-                long sum = 0;
-                for(int k = 0; k <= j; k++) {
-                    sum += (dp[i-1][j - k] * dp[1][k]) % MOD;
-                }
-                dp[i][j] = sum % MOD;
+                dp[i][j] = (dp[i][j-1] + dp[i-1][j]) % MOD;
             }
         }
 
