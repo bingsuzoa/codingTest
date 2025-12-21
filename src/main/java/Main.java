@@ -2,36 +2,18 @@ import java.util.*;
 import java.io.*;
 
 class Main {
-    static int N;
-    static long M;
-    static long[] graph;
-    static long answer = Long.MAX_VALUE;
+    static int MOD = 1000000;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        StringTokenizer st = new StringTokenizer(br.readLine());
+        long N = Long.parseLong(br.readLine());
 
-        N = Integer.parseInt(st.nextToken());
-        M = Long.parseLong(st.nextToken());
-        graph = new long[N];
-
-        for(int i = 0; i < graph.length; i++) {
-            graph[i] = Long.parseLong(br.readLine());
+        long sum = 0;
+        for(long i = 2; i <= N / 2; i++) {
+            long count = N / i - 1;
+            sum += (i * count) % MOD;
         }
-        Arrays.sort(graph);
-
-        int left = 0;
-        int right = 1;
-
-        while(right < graph.length && left < graph.length) {
-            if(graph[right] - graph[left] < M) {
-                right++;
-            } else {
-                answer = Math.min(answer, graph[right] - graph[left]);
-                left++;
-            }
-        }
-        System.out.println(answer);
+        System.out.println(sum % MOD);
     }
 }
