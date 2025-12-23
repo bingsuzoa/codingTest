@@ -1,50 +1,83 @@
-import java.util.*;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.StringTokenizer;
 
 class Main {
+    static List<int[]> list;
+    static List<int[]> result;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         int N = Integer.parseInt(br.readLine());
-        int M = Integer.parseInt(br.readLine());
 
-        int[] graph = new int[M];
-        for(int i = 0; i < graph.length; i++) {
-            graph[i] = Integer.parseInt(br.readLine());
-        }
-
-        if(N == 1) {
-            System.out.println(1);
-            return;
-        }
-
-        int[] dp = new int[N+1];
-        dp[1] = 1;
-        dp[2] = 2;
-
-        for(int i = 3; i < dp.length; i++) {
-            dp[i] = dp[i-1] + dp[i-2];
-        }
-
-        List<Integer> list = new ArrayList<>();
-        int people = 0;
-        for(int value : graph) {
-            if(value - people -1 == 0) {
-                people = value;
-                continue;
+        list = new ArrayList<>();
+        result = new ArrayList<>();
+        for (int i = 0; i < N; i++) {
+            int L = Integer.parseInt(br.readLine());
+            int[] temp = new int[L];
+            StringTokenizer st = new StringTokenizer(br.readLine());
+            for (int j = 0; j < temp.length; j++) {
+                temp[j] = Integer.parseInt(st.nextToken());
             }
-            list.add(value - people - 1);
-            people = value;
+            list.add(temp);
         }
-        if(people < N) {
-            list.add(N - people);
+        for (int i = 0; i < list.size(); i++) {
+            decide(list.get(i));
         }
 
-        int sum = 1;
-        for(int result : list) {
-            sum *= dp[result];
+//        Collections.sort(result, (o1, o2) -> {
+//            if (o1[0] == o2[0]) {
+//                return o1[1] - o2[1];
+//            }
+//            return o1[0] - o2[0];
+//        });
+
+        int sum = 0;
+        StringBuilder sb = new StringBuilder();
+        for (int[] array : result) {
+            sum += array[2];
         }
-        System.out.println(sum);
+        sb.append(sum).append("\n");
+        for (int[] array : result) {
+            sb.append(array[0] + " " + array[1]).append("\n");
+        }
+        System.out.println(sb);
+    }
+    private static void decide(int[] graph) {
+        int sum = graph[0];
+
+        int maxLeft =0;
+        int maxRight = 0;
+        int maxSum = graph[0];
+
+        int left = 0;
+        int right = 0;
+        for(int i = 1; i < graph.length; i++) {
+            if(sum + graph[i] <= graph[i]) {
+                left = i;
+                right = i;
+                sum = graph[i];
+            } else {
+                right = i;
+                sum += graph[i];
+            }
+            if(sum > maxSum) {
+                maxLeft = left;
+                maxRight = right;
+                maxSum = sum;
+            }
+            else if(sum == maxSum) {
+                if(maxRight - maxLeft > right - left) {
+                    maxRight = right;
+                    maxLeft = left;
+                }
+            }
+        }
+        result.add(new int[]{maxLeft + 1, maxRight + 1, maxSum});
     }
 }
