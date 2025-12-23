@@ -1,83 +1,74 @@
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.StringTokenizer;
+import java.util.*;
+import java.io.*;
+
 
 class Main {
-    static List<int[]> list;
-    static List<int[]> result;
+    static int[] graph;
+    static int N, M;
+    static int sum = 0;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        int N = Integer.parseInt(br.readLine());
+        StringTokenizer st = new StringTokenizer(br.readLine());
+        N = Integer.parseInt(st.nextToken());
+        M = Integer.parseInt(st.nextToken());
 
-        list = new ArrayList<>();
-        result = new ArrayList<>();
-        for (int i = 0; i < N; i++) {
-            int L = Integer.parseInt(br.readLine());
-            int[] temp = new int[L];
-            StringTokenizer st = new StringTokenizer(br.readLine());
-            for (int j = 0; j < temp.length; j++) {
-                temp[j] = Integer.parseInt(st.nextToken());
-            }
-            list.add(temp);
-        }
-        for (int i = 0; i < list.size(); i++) {
-            decide(list.get(i));
-        }
+        graph = new int[N];
+        StringTokenizer st1 = new StringTokenizer(br.readLine());
 
-//        Collections.sort(result, (o1, o2) -> {
-//            if (o1[0] == o2[0]) {
-//                return o1[1] - o2[1];
-//            }
-//            return o1[0] - o2[0];
-//        });
-
-        int sum = 0;
-        StringBuilder sb = new StringBuilder();
-        for (int[] array : result) {
-            sum += array[2];
+        for(int i = 0; i < graph.length; i++) {
+            graph[i] = Integer.parseInt(st1.nextToken());
+            sum += graph[i];
         }
-        sb.append(sum).append("\n");
-        for (int[] array : result) {
-            sb.append(array[0] + " " + array[1]).append("\n");
-        }
-        System.out.println(sb);
+        System.out.println(check());
     }
-    private static void decide(int[] graph) {
-        int sum = graph[0];
 
-        int maxLeft =0;
-        int maxRight = 0;
-        int maxSum = graph[0];
+    private static int check() {
+        int start = getMax();
+        int end = sum;
 
-        int left = 0;
-        int right = 0;
-        for(int i = 1; i < graph.length; i++) {
-            if(sum + graph[i] <= graph[i]) {
-                left = i;
-                right = i;
-                sum = graph[i];
+        while(start <= end) {
+            int mid = (start + end) / 2;
+
+            int result = getCount(mid);
+            if(result <= M) {
+                end = mid - 1;
             } else {
-                right = i;
-                sum += graph[i];
-            }
-            if(sum > maxSum) {
-                maxLeft = left;
-                maxRight = right;
-                maxSum = sum;
-            }
-            else if(sum == maxSum) {
-                if(maxRight - maxLeft > right - left) {
-                    maxRight = right;
-                    maxLeft = left;
-                }
+                start = mid + 1;
             }
         }
-        result.add(new int[]{maxLeft + 1, maxRight + 1, maxSum});
+        return start;
+    }
+
+    private static int getMax() {
+        int max = -1;
+        for(int i =0 ; i < graph.length; i++) {
+           max = Math.max(max, graph[i]);
+        }
+        return max;
+    }
+
+    private static int getCount(int time) {
+        int count = 0;
+
+        int cur = 0;
+        for(int i = 0; i < graph.length; i++) {
+            if(i == graph.length - 1) {
+                if(cur + graph[i] > time) {
+                    count += 2;
+                } else {
+                    count += 1;
+                }
+                break;
+            }
+            if(cur + graph[i] > time) {
+                count++;
+                cur = graph[i];
+            } else {
+                cur += graph[i];
+            }
+        }
+        return count;
     }
 }
