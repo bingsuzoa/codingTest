@@ -2,53 +2,45 @@ import java.util.*;
 import java.io.*;
 
 class Main {
-    static int[][] dp;
-    static boolean[] primes;
+    static long minSum = Long.MAX_VALUE;
+    static long[] graph = new long[2];
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        int N = Integer.parseInt(br.readLine());
+        StringTokenizer st = new StringTokenizer(br.readLine());
 
-        dp = new int[N+1][N+1];
+        int A = Integer.parseInt(st.nextToken());
+        int B = Integer.parseInt(st.nextToken());
 
-
-        String value = String.valueOf(N) + String.valueOf(N);
-        int num = Integer.parseInt(value);
-        primes = new boolean[num + 1];
-        Arrays.fill(primes, true);
-
-        primes[0] = false;
-        primes[1] = false;
-
-        for(int i = 2; i * i < primes.length; i++) {
-            if(primes[i]) {
-                for(int j = i * i; j < primes.length; j+= i) {
-                    primes[j] = false;
-                }
-            }
+        if(A == B) {
+            System.out.println(A + " " + B);
+            return;
         }
+        fillGraph(B / A);
 
-        for(int i = 0; i < dp.length; i++) {
-            Arrays.fill(dp[i], -1);
-        }
-
-        dp[1][1] = 0;
-        for(int i = 1; i < dp.length; i++) {
-            for(int j = 1; j < dp[i].length; j++) {
-                if(i == 1 && j == 1) continue;
-                if(primes[getNum(i, j)]) {
-                    dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]) + 1;
-                } else {
-                    dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
-                }
-            }
-        }
-        System.out.println(dp[N][N]);
+        System.out.println(A * graph[0] + " " + A * graph[1]);
     }
 
-    private static int getNum(int x, int y) {
-        String temp = String.valueOf(x) + String.valueOf(y);
-        return Integer.parseInt(temp);
+    private static void fillGraph(int B) {
+        for(int i = 1; i <= B/ 2; i++) {
+            if(B % i != 0) continue;
+            int pair = B / i;
+            long tempSum = i + pair;
+            if(gcd(i, pair) == 1 && minSum > tempSum) {
+                graph[0] = i;
+                graph[1] = pair;
+                minSum = tempSum;
+            }
+        }
+    }
+
+    private static int gcd(int a, int b) {
+        while(b != 0) {
+            int temp = a % b;
+            a = b;
+            b = temp;
+        }
+        return a;
     }
 }
