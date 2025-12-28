@@ -1,74 +1,35 @@
 import java.util.*;
 import java.io.*;
 
-
 class Main {
-    static int[] graph;
-    static int N, M;
-    static int sum = 0;
+    static long MOD = 1000000000;
+
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        StringTokenizer st = new StringTokenizer(br.readLine());
-        N = Integer.parseInt(st.nextToken());
-        M = Integer.parseInt(st.nextToken());
+        int N = Integer.parseInt(br.readLine());
 
-        graph = new int[N];
-        StringTokenizer st1 = new StringTokenizer(br.readLine());
+        long[] dp = new long[N+1];
 
-        for(int i = 0; i < graph.length; i++) {
-            graph[i] = Integer.parseInt(st1.nextToken());
-            sum += graph[i];
+        if(N == 1) {
+            System.out.println(1);
+            return;
         }
-        System.out.println(check());
-    }
+        if(N == 2) {
+            System.out.println(2);
+            return;
+        }
+        dp[1] = 1;
+        dp[2] = 2;
 
-    private static int check() {
-        int start = getMax();
-        int end = sum;
-
-        while(start <= end) {
-            int mid = (start + end) / 2;
-
-            int result = getCount(mid);
-            if(result <= M) {
-                end = mid - 1;
+        for(int i = 3; i < dp.length; i++) {
+            if(i % 2 == 0) {
+                dp[i] = (dp[i - 1] + dp[i/2]) % MOD;
             } else {
-                start = mid + 1;
+                dp[i] = dp[i-1] % MOD;
             }
         }
-        return start;
-    }
-
-    private static int getMax() {
-        int max = -1;
-        for(int i =0 ; i < graph.length; i++) {
-           max = Math.max(max, graph[i]);
-        }
-        return max;
-    }
-
-    private static int getCount(int time) {
-        int count = 0;
-
-        int cur = 0;
-        for(int i = 0; i < graph.length; i++) {
-            if(i == graph.length - 1) {
-                if(cur + graph[i] > time) {
-                    count += 2;
-                } else {
-                    count += 1;
-                }
-                break;
-            }
-            if(cur + graph[i] > time) {
-                count++;
-                cur = graph[i];
-            } else {
-                cur += graph[i];
-            }
-        }
-        return count;
+        System.out.println(dp[N] % MOD);
     }
 }
