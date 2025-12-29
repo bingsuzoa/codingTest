@@ -2,45 +2,60 @@ import java.util.*;
 import java.io.*;
 
 class Main {
-    static long minSum = Long.MAX_VALUE;
-    static long[] graph = new long[2];
+    static long N, M;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         StringTokenizer st = new StringTokenizer(br.readLine());
+        N = Long.parseLong(st.nextToken());
+        M = Long.parseLong(st.nextToken());
 
-        int A = Integer.parseInt(st.nextToken());
-        int B = Integer.parseInt(st.nextToken());
-
-        if(A == B) {
-            System.out.println(A + " " + B);
-            return;
-        }
-        fillGraph(B / A);
-
-        System.out.println(A * graph[0] + " " + A * graph[1]);
-    }
-
-    private static void fillGraph(int B) {
-        for(int i = 1; i <= B/ 2; i++) {
-            if(B % i != 0) continue;
-            int pair = B / i;
-            long tempSum = i + pair;
-            if(gcd(i, pair) == 1 && minSum > tempSum) {
-                graph[0] = i;
-                graph[1] = pair;
-                minSum = tempSum;
+        Set<Long> set = new HashSet<>();
+        for(int len = 1; len <= 63; len++) {
+            for(int a = 1; a <= len; a++) {
+                for(int b = 0; b <= len - a; b++) {
+                    if(b == 0) {
+                        generate(a, b, len, set);
+                    }
+                    else if(len % (a + b) == 0 || len % (a + b) == a) {
+                        generate(a, b, len, set);
+                    }
+                }
             }
         }
+        System.out.println(set.size());
     }
 
-    private static int gcd(int a, int b) {
-        while(b != 0) {
-            int temp = a % b;
-            a = b;
-            b = temp;
+    private static void generate(int a, int b, int totalLen, Set<Long> set) {
+
+        boolean isLeft = true;
+        int curLen = 0;
+        long num = 0;
+
+        if(b == 0) {
+            for(int i = 0; i < totalLen; i++) {
+                num <<= 1;
+                num |= 1;
+            }
+            if(num >= N && num <= M) {
+                set.add(num);
+            }
+            return;
         }
-        return a;
+
+        while(curLen < totalLen) {
+            int count = isLeft ? a : b;
+            for(int i = 0; i < count && curLen < totalLen; i++) {
+                num <<= 1;
+                if(isLeft) num |= 1;
+                curLen++;
+            }
+            isLeft = !isLeft;
+        }
+
+        if(num >= N && num <= M) {
+            set.add(num);
+        }
     }
 }
