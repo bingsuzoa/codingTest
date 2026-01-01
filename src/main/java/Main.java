@@ -2,60 +2,33 @@ import java.util.*;
 import java.io.*;
 
 class Main {
-    static long N, M;
+    static int N, K;
+    static int[] graph;
+
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         StringTokenizer st = new StringTokenizer(br.readLine());
-        N = Long.parseLong(st.nextToken());
-        M = Long.parseLong(st.nextToken());
+        N = Integer.parseInt(st.nextToken());
+        K = Integer.parseInt(st.nextToken());
 
-        Set<Long> set = new HashSet<>();
-        for(int len = 1; len <= 63; len++) {
-            for(int a = 1; a <= len; a++) {
-                for(int b = 0; b <= len - a; b++) {
-                    if(b == 0) {
-                        generate(a, b, len, set);
-                    }
-                    else if(len % (a + b) == 0 || len % (a + b) == a) {
-                        generate(a, b, len, set);
-                    }
-                }
-            }
+        graph = new int[K];
+        for(int i = 0; i < graph.length; i++) {
+            graph[i] = Integer.parseInt(br.readLine());
         }
-        System.out.println(set.size());
+        Arrays.sort(graph);
+
+        int re1 = graph[0];
+        int re2 = N - graph[K-1];
+
+        int answer = Math.max(re1, re2);
+
+        for(int i = 0; i < graph.length - 1; i++) {
+            answer = Math.max(answer, (graph[i+1] - graph[i]) / 2);
+        }
+        System.out.println(answer);
     }
 
-    private static void generate(int a, int b, int totalLen, Set<Long> set) {
 
-        boolean isLeft = true;
-        int curLen = 0;
-        long num = 0;
-
-        if(b == 0) {
-            for(int i = 0; i < totalLen; i++) {
-                num <<= 1;
-                num |= 1;
-            }
-            if(num >= N && num <= M) {
-                set.add(num);
-            }
-            return;
-        }
-
-        while(curLen < totalLen) {
-            int count = isLeft ? a : b;
-            for(int i = 0; i < count && curLen < totalLen; i++) {
-                num <<= 1;
-                if(isLeft) num |= 1;
-                curLen++;
-            }
-            isLeft = !isLeft;
-        }
-
-        if(num >= N && num <= M) {
-            set.add(num);
-        }
-    }
 }
