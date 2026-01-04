@@ -2,61 +2,69 @@ import java.util.*;
 import java.io.*;
 
 class Main {
-    static int[] costs;
-    static int[] graph;
-    static int[][] dp;
-    static int n,m,c;
+    static int N,M;
+    static int[][] graph;
+    static int X;
+    static int pos;
+    static boolean[][] visited;
+    static Queue<int[]> queue;
 
     public static void main(String[] args) throws IOException {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        StringBuilder sb = new StringBuilder();
 
-        int T = Integer.parseInt(br.readLine());
+        N = Integer.parseInt(br.readLine());
+        M = Integer.parseInt(br.readLine());
+        graph = new int[N][M];
 
-        for(int i = 0; i < T; i++) {
+        for(int i = 0; i < graph.length; i++) {
             StringTokenizer st = new StringTokenizer(br.readLine());
-            n = Integer.parseInt(st.nextToken());
-            m = Integer.parseInt(st.nextToken());
-            c = Integer.parseInt(st.nextToken());
-
-            costs = new int[m+1];
-            StringTokenizer st1 = new StringTokenizer(br.readLine());
-            for(int j = 1; j <= m; j++) {
-                costs[j] = Integer.parseInt(st1.nextToken());
+            for(int j = 0; j < graph[i].length; j++) {
+                graph[i][j] = Integer.parseInt(st.nextToken());
             }
-
-            graph = new int[n];
-            StringTokenizer st2 = new StringTokenizer(br.readLine());
-            for(int j = 0; j < graph.length; j++) {
-                graph[j] = Integer.parseInt(st2.nextToken());
-            }
-
-            dp = new int[n][m+1];
-            for(int j = 0; j < dp.length; j++) {
-                Arrays.fill(dp[j], 1_000_000_000);
-            }
-
-            sb.append(dfs(0,0)).append("\n");
         }
 
-        System.out.println(sb.toString().trim());
+        X = Integer.parseInt(br.readLine());
+
+        visited = new boolean[N][M];
+        queue = new LinkedList<>();
+        pos = graph[0][0];
+        queue.add(new int[]{0,0});
+        visited[0][0] = true;
+
+        if(graph[N-1][M-1] != pos) {
+            System.out.println("DEAD");
+            return;
+        }
+
+        while(!queue.isEmpty()) {
+            int[] cur = queue.poll();
+            int sx = cur[0];
+            int sy = cur[1];
+
+            if(sx == N-1 && sy == M-1) {
+                System.out.println("ALIVE");
+                return;
+            }
+
+            getMan(sx, sy);
+        }
+
+        System.out.println("DEAD");
+
+    }
+    private static void getMan(int sx, int sy) {
+        for(int i = graph.length - 1; i >= 0; i--) {
+            for(int j = graph[i].length -1; j >= 0; j--) {
+                if(isMan(sx, sy, i, j) && graph[i][j] == pos && !visited[i][j]) {
+                    visited[i][j] = true;
+                    queue.add(new int[]{i, j});
+                }
+            }
+        }
     }
 
-    private static int dfs(int cur, int save) {
-        if(cur == n) {
-            return 0;
-        }
-
-        if(dp[cur][save] != 1_000_000_000) return dp[cur][save];
-
-        int ref = 1_000_000_000;
-        if(save == graph[cur]) {
-            ref = Math.min(ref, dfs(cur + 1, save));
-        } else {
-            // area1에 안옮겨
-            ref = Math.min(ref, dfs(cur + 1, save) + costs[graph[cur]]);
-            ref = Math.min(ref, dfs(cur + 1, graph[cur]) + c);
-        }
-        return dp[cur][save] = Math.min(dp[cur][save], ref);
+    private static boolean isMan(int sx, int sy, int ex, int ey) {
+        int length = Math.abs(sx - ex) + Math.abs(sy - ey);
+        return length <= X;
     }
 }
