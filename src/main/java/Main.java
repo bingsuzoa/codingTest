@@ -1,62 +1,44 @@
 import java.util.*;
 import java.io.*;
 
-
 class Main {
+    static String st1, st2;
+    static int n, m;
+    static char[] array1;
+    static char[] array2;
     static int[][] dp;
-    static Set<Integer> set;
 
     public static void main(String[] args) throws IOException {
+
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
-        int t = Integer.parseInt(br.readLine());
+        st1 = br.readLine();
+        st2 = br.readLine();
 
+        n = st1.length();
+        m = st2.length();
 
-        while(t --> 0) {
-            StringTokenizer st = new StringTokenizer(br.readLine());
+        dp = new int[n+1][m+1];
+        array1 = new char[n];
+        array2 = new char[m];
 
-            set = new HashSet<>();
-            int n = Integer.parseInt(st.nextToken());
-            int m = Integer.parseInt(st.nextToken());
-            int k = Integer.parseInt(st.nextToken());
-            dp = new int[n + 1][n + 1];
-            initSet(m, k, n);
+        for(int i = 0; i < st1.length(); i++) {
+            array1[i] = st1.charAt(i);
+        }
+        for(int i = 0; i < st2.length(); i++) {
+            array2[i] = st2.charAt(i);
+        }
 
-            for(int i = 1; i < dp[0].length; i++) {
-                if(!set.contains(i)) {
-                    dp[1][i] = 1;
+        for(int i = 1; i < dp.length; i++) {
+            for(int j = 1; j < dp[0].length; j++) {
+                if(array1[i-1] == array2[j-1]) {
+                    dp[i][j] = dp[i-1][j-1] + 1;
+                } else {
+                    dp[i][j] = Math.max(dp[i-1][j], dp[i][j-1]);
                 }
             }
-
-            for(int i = 2; i < dp.length; i++) {
-                for(int j = i; j <dp[i].length; j++) {
-                    for(int o = 1; o < j; o++) {
-                        if(set.contains(o)) continue;
-                        int pair = j - o;
-                        dp[i][j] += dp[i-1][pair];
-                    }
-                }
-            }
-
-            int answer = 0;
-            for(int i = 1; i < dp.length; i++) {
-                answer += dp[i][n];
-            }
-            System.out.println(answer);
         }
-    }
 
-    private static void initSet(int m, int k, int n) {
-        int i = 0;
-        while(true) {
-            int num = m + i * k;
-            if(num <= n) {
-                set.add(num);
-                i++;
-            } else {
-                break;
-            }
-
-        }
+        System.out.println(dp[n][m]);
     }
 }
